@@ -1,10 +1,8 @@
 
 # joshua-nugent.github.io
-![Image](_bias_pql_sbs1.png "bias")
+I am a PhD student in Biostatistics at the University of Massachusetts, studying causal inference (with Laura Balzer) and cluster-randomized trials (with Ken Kleinman).
+
 ## Projects:
-
-
-## Papers:
-
+![Bias in PQL estimation](_bias_pql_sbs1.png)
 
 ##
