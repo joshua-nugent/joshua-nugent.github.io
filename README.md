@@ -4,4 +4,4 @@ I am a PhD student in Biostatistics at the University of Massachusetts, studying
 
 ## Projects:
 Investigating bias in penalized quasi-likelihood (PQL) estimation for generalized linear mixed models with dichotomous outcomes. Paper in process.
-![Bias in PQL estimation](images/bias_pql_sbs1.png | width=100)
+![Bias in PQL estimation](images/bias_pql_sbs1.png =250x250)
