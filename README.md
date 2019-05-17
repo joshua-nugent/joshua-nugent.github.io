@@ -1,11 +1,12 @@
-<img style="float: right;" src="images/chainsaw1.jpg" alt="What I look like">
+<img style="float: right;" src="images/chainsaw1.jpg" alt="What I look like" hspace="50">
 
 # Josh Nugent
 
 I am a PhD student in Biostatistics at the University of Massachusetts in Amherst, studying causal inference (with [Laura Balzer](https://www.balzerlab.com/)) and cluster-randomized trials (with [Ken Kleinman](https://www.kleinman.science/)).
 
-<br/>
 Before enetering the PhD program, I was a high school math teacher and chainsaw safety enthusiast for 8 years.
+<br/>
+<br/>
 <br/>
 <br/>
 
