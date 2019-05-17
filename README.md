@@ -1,6 +1,6 @@
 
 # Josh Nugent
-![What I look like](images/chainsaw1.jpg)
+<img style="float: right;" src="images/chainsaw1.jpg">
 I am a PhD student in Biostatistics at the University of Massachusetts, studying causal inference (with [Laura Balzer](https://www.balzerlab.com/)) and cluster-randomized trials (with [Ken Kleinman](https://www.kleinman.science/)).
 
 ## Projects:
