@@ -13,7 +13,7 @@ Before enetering the PhD program, I was a high school math teacher and chainsaw 
 ## Current Research Projects
  + Power calculations for individually randomized group treatment trials
  
- + Nested frailty models in survival analysis
+ + Comparing approaches to nested frailty models in survival analysis
 
  + Investigating bias in penalized quasi-likelihood (PQL) estimation for generalized linear mixed models with dichotomous outcomes (paper in process)
 
