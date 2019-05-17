@@ -1,4 +1,4 @@
-<img style="float: right;" src="images/chainsaw1.jpg"; alt = "What I look like">
+<img style="float: right;" src="images/chainsaw1.jpg" alt="What I look like">
 
 # Josh Nugent
 
@@ -8,4 +8,4 @@ Before enetering the PhD program, I was a high school math teacher (and chainsaw
 
 ## Current Research Projects:
 Investigating bias in penalized quasi-likelihood (PQL) estimation for generalized linear mixed models with dichotomous outcomes. Paper in process.
-<img width="400"; src="images/bias_pql_sbs1.png"; alt = "Bias in PQL estimation (plot)">
+<img width="400" src="images/bias_pql_sbs1.png" alt="Bias in PQL estimation (plot)">
