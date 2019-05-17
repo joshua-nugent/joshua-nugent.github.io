@@ -7,6 +7,8 @@ I am a PhD student in Biostatistics at the University of Massachusetts in Amhers
 <br/><br/>
 
 ## Current Research Projects:
-Investigating bias in penalized quasi-likelihood (PQL) estimation for generalized linear mixed models with dichotomous outcomes. Paper in process.
+ + Power calculations for individually randomized group treatment trials
+
+ + Investigating bias in penalized quasi-likelihood (PQL) estimation for generalized linear mixed models with dichotomous outcomes. Paper in process.
 
 <img align = "bottom" width="400" src="images/bias_pql_sbs1.png" alt="Bias in PQL estimation (plot)">
