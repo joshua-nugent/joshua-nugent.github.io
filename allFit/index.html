@@ -382,11 +382,13 @@ $(document).ready(function () {
 
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
-<p>The goal of this vignette is to show how to use allFit() in the lme4 package to quickly test different optimizers to find one that converges.</p>
-<p>This draws heavily on posts by <a href="http://svmiller.com/blog/2018/06/mixed-effects-models-optimizer-checks/">Steven Miller</a> and <a href="https://rstudio-pubs-static.s3.amazonaws.com/33653_57fc7b8e5d484c909b615d8633c01d51.html">unknown author</a>, many thanks!</p>
+<p>I commonly encounter onvergence problems when fitting mixed models. The goal of this vignette is to show how to use allFit() in the lme4 package to quickly test different optimizers to (hopefully) find at least one that converges.</p>
+<p>This draws heavily on posts by <a href="http://svmiller.com/blog/2018/06/mixed-effects-models-optimizer-checks/">Steven V. Miller</a> and <a href="https://rstudio-pubs-static.s3.amazonaws.com/33653_57fc7b8e5d484c909b615d8633c01d51.html">unknown author</a>, many thanks!</p>
+<p>and <a href="https://cran.r-project.org/web/packages/lme4/vignettes/lmerperf.html" class="uri">https://cran.r-project.org/web/packages/lme4/vignettes/lmerperf.html</a></p>
 <pre class="r"><code>library(tidyverse)
 library(lme4)
-library(parallel)</code></pre>
+library(parallel)
+library(optimx)</code></pre>
 </div>
 <div id="our-hypothetical-test-case" class="section level2">
 <h2>Our hypothetical test case</h2>
@@ -395,7 +397,6 @@ library(parallel)</code></pre>
   narm &lt;- 2
   n &lt;- nsub * nclust * narm
   y &lt;- rep_len(NA, n)
-  y_bin &lt;- rep_len(NA, n)
   arm &lt;- rep(0:(narm-1), each = nsub*nclust)
   arm_factor &lt;- as.factor(arm)
   clustid &lt;- rep(1:(nclust*narm), each = nsub)
@@ -408,52 +409,23 @@ library(parallel)</code></pre>
   output &lt;- cbind.data.frame(arm, arm_factor, clustid, sig_b2, clustRE, error, beta, y)
   return(output)
 }
-set.seed(1)
-dat &lt;- sim(nsub = 100, nclust = 50, sigma_residual2 = .5,  sig_b2 = c(.1, .2), betas = c(0,.5))</code></pre>
-<p>With our data in hand, let’s fit a model that allows for different cluster-level variances in the two arms:</p>
+set.seed(2)
+dat &lt;- sim(nsub = 100, nclust = 100, sigma_residual2 = .2,  sig_b2 = c(.3, 1), betas = c(0,1))</code></pre>
+<p>With our data in hand, let’s fit a model that allows for different cluster-level variances in the two arms. Note that we get a convergence error.</p>
 <pre class="r"><code>model &lt;- lmer(y ~ arm + (1 + arm | clustid), data = dat)</code></pre>
 <pre><code>## Warning in checkConv(attr(opt, &quot;derivs&quot;), opt$par, ctrl =
-## control$checkConv, : Model failed to converge with max|grad| = 0.0140063
+## control$checkConv, : Model failed to converge with max|grad| = 0.0053551
 ## (tol = 0.002, component 1)</code></pre>
-<pre class="r"><code>summary(model)</code></pre>
-<pre><code>## Linear mixed model fit by REML ['lmerMod']
-## Formula: y ~ arm + (1 + arm | clustid)
-##    Data: dat
-## 
-## REML criterion at convergence: 22002.5
-## 
-## Scaled residuals: 
-##     Min      1Q  Median      3Q     Max 
-## -3.6112 -0.6579 -0.0121  0.6810  3.8496 
-## 
-## Random effects:
-##  Groups   Name        Variance Std.Dev. Corr
-##  clustid  (Intercept) 0.06664  0.2581       
-##           arm         0.09623  0.3102   0.20
-##  Residual             0.51181  0.7154       
-## Number of obs: 10000, groups:  clustid, 100
-## 
-## Fixed effects:
-##             Estimate Std. Error t value
-## (Intercept)  0.02641    0.03788   0.697
-## arm          0.52076    0.07369   7.067
-## 
-## Correlation of Fixed Effects:
-##     (Intr)
-## arm -0.514
-## convergence code: 0
-## Model failed to converge with max|grad| = 0.0140063 (tol = 0.002, component 1)</code></pre>
-<p>Our model didn’t converge. Using allFit, we can see if different optimizers might give us better results…</p>
+<p>Using allFit(), we can see if different optimizers might give us better results… it uses parallel processing if possible to run multiple fits at once. You can also use it to figure out which algorithm is fastest in your data setting, for more on that go HERE.</p>
 <pre class="r"><code>ncores &lt;- detectCores()
-diff_optims &lt;- allFit(model, parallel = 'multicore', ncpus = ncores, maxfun = 1e6)</code></pre>
+diff_optims &lt;- allFit(model, maxfun = 1e6, parallel = 'multicore', ncpus = ncores)</code></pre>
 <pre><code>## Loading required namespace: dfoptim</code></pre>
 <pre class="r"><code>is.OK &lt;- sapply(diff_optims,is,&quot;merMod&quot;)  ## nlopt NELDERMEAD failed, others succeeded
 diff_optims.OK &lt;- diff_optims[is.OK]
 lapply(diff_optims.OK,function(x) x@optinfo$conv$lme4$messages)</code></pre>
 <pre><code>## $bobyqa
-## $bobyqa[[1]]
-## [1] &quot;Model is nearly unidentifiable: large eigenvalue ratio\n - Rescale variables?&quot;
-## 
+## [1] &quot;unable to evaluate scaled gradient&quot;                                       
+## [2] &quot;Model failed to converge: degenerate  Hessian with 1 negative eigenvalues&quot;
 ## 
 ## $Nelder_Mead
 ## NULL
@@ -465,35 +437,47 @@ lapply(diff_optims.OK,function(x) x@optinfo$conv$lme4$messages)</code></pre>
 ## [1] &quot;unable to evaluate scaled gradient&quot;                                       
 ## [2] &quot;Model failed to converge: degenerate  Hessian with 1 negative eigenvalues&quot;
 ## 
+## $`optimx.L-BFGS-B`
+## [1] &quot;unable to evaluate scaled gradient&quot;                                       
+## [2] &quot;Model failed to converge: degenerate  Hessian with 1 negative eigenvalues&quot;
+## 
 ## $nloptwrap.NLOPT_LN_NELDERMEAD
-## [1] &quot;Model failed to converge with max|grad| = 0.0140063 (tol = 0.002, component 1)&quot;
+## [1] &quot;Model failed to converge with max|grad| = 0.0053551 (tol = 0.002, component 1)&quot;
 ## 
 ## $nloptwrap.NLOPT_LN_BOBYQA
-## [1] &quot;Model failed to converge with max|grad| = 0.0140063 (tol = 0.002, component 1)&quot;</code></pre>
-<pre class="r"><code># Extract parameters to check
-narms &lt;- 2
-sig_b2 &lt;- vector(length = narms)
-betas &lt;- vector(length = narms)
-betas &lt;- fixef(model)[1:narms]
-random_effects &lt;- as.data.frame(VarCorr(model)$clustid)
-corrmatrix &lt;- as.data.frame(VarCorr(model))$sdcor
-sig_b2[1] &lt;- random_effects[1,1]
-for(i in 2:narms){
-  sig_b2[i] &lt;- random_effects[1,1] + random_effects[i,i] + 
-    2*sqrt(random_effects[1,1])*sqrt(random_effects[i,i])*corrmatrix[narms-1+i]
-}
-
-# they work!
-sig_b2</code></pre>
-<pre><code>## [1] 0.06663623 0.19460389</code></pre>
-<pre class="r"><code>betas</code></pre>
-<pre><code>## (Intercept)         arm 
-##  0.02640593  0.52076088</code></pre>
-<p>This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <a href="http://rmarkdown.rstudio.com" class="uri">http://rmarkdown.rstudio.com</a>.</p>
-<p>When you click the <strong>Knit</strong> button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:</p>
-</div>
-<div id="i" class="section level2">
-<h2>I</h2>
+## [1] &quot;Model failed to converge with max|grad| = 0.0053551 (tol = 0.002, component 1)&quot;</code></pre>
+<p>While many algorithms did not converge, it looks like Nelder_Mead and nlminbwrap did. Yay! Further, these two algorithms are built in to lme4, so we do not require the optimx or nloptr packages (at least for now). Let’s check those and see if we are correct:</p>
+<pre class="r"><code>model2 &lt;- lmer(y ~ arm + (1 + arm | clustid), data = dat,
+               control = lmerControl(optimizer = &quot;Nelder_Mead&quot;))
+model3 &lt;- lmer(y ~ arm + (1 + arm | clustid), data = dat,
+               control = lmerControl(optimizer = &quot;nlminbwrap&quot;))
+summary(model2)</code></pre>
+<pre><code>## Linear mixed model fit by REML ['lmerMod']
+## Formula: y ~ arm + (1 + arm | clustid)
+##    Data: dat
+## Control: lmerControl(optimizer = &quot;Nelder_Mead&quot;)
+## 
+## REML criterion at convergence: 25886.7
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -4.1341 -0.6669  0.0044  0.6682  3.5594 
+## 
+## Random effects:
+##  Groups   Name        Variance Std.Dev. Corr
+##  clustid  (Intercept) 0.4129   0.6425       
+##           arm         0.3323   0.5765   0.30
+##  Residual             0.2016   0.4490       
+## Number of obs: 20000, groups:  clustid, 200
+## 
+## Fixed effects:
+##             Estimate Std. Error t value
+## (Intercept) -0.01099    0.06441  -0.171
+## arm          1.03935    0.11777   8.825
+## 
+## Correlation of Fixed Effects:
+##     (Intr)
+## arm -0.547</code></pre>
 </div>
 
 
