@@ -380,6 +380,29 @@ $(document).ready(function () {
 </div>
 
 
+<div id="tldr" class="section level1">
+<h1>TL;DR</h1>
+<p>To automatically iterate through all possible (g)lmer optimizers and find one that converges, use code similar to what’s below:</p>
+<pre><code>model &lt;- lmer(y ~ arm + (1 + arm | clustid), data = dat)
+diff_optims &lt;- allFit(model, maxfun = 1e5, parallel = 'multicore', ncpus = detectCores())
+is.OK &lt;- sapply(diff_optims, is, &quot;merMod&quot;)
+diff_optims.OK &lt;- diff_optims[is.OK]
+lapply(diff_optims.OK,function(x) x@optinfo$conv$lme4$messages)
+
+convergence_results &lt;- lapply(diff_optims.OK,function(x) x@optinfo$conv$lme4$messages)
+working_indices &lt;- sapply(convergence_results, is.null)
+
+if(length(working_indices)==0){
+  print(&quot;No algorithms from allFit converged.&quot;)
+  print(&quot;You may still be able to use the results, but proceed with extreme caution.&quot;)
+  first_fit &lt;- NULL
+} else {
+  first_fit &lt;- diff_optims[working_indices][[1]]
+}
+first_fit</code></pre>
+</div>
+<div id="all-the-details" class="section level1">
+<h1>All the details</h1>
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
 <p>I frequently encounter onvergence problems when fitting mixed models. The goal of this vignette is to show how to use allFit() in the lme4 package to quickly test different optimizers in search of convergence.</p>
@@ -413,7 +436,7 @@ dat &lt;- sim(nsub = 100, nclust = 100, sigma_residual2 = .2,  sig_b2 = c(.3, 1)
 </div>
 <div id="convergence-fails-with-default-settings" class="section level2">
 <h2>Convergence fails with default settings</h2>
-<p>With our data in hand, let’s fit a model that allows for different cluster-level variances in the two arms. We get a convergence error. Not surprising given the purpose of this vignette.</p>
+<p>With our data in hand, let’s fit a model that allows for different cluster-level variances in the two arms - we have a random intercept that is shared between both arms, then an additional amount of variance when arm = 1. When fitting this model, we get a convergence error. Not surprising, given the purpose of this vignette.</p>
 <pre class="r"><code>model &lt;- lmer(y ~ arm + (1 + arm | clustid), data = dat)</code></pre>
 <pre><code>## Warning in checkConv(attr(opt, &quot;derivs&quot;), opt$par, ctrl =
 ## control$checkConv, : Model failed to converge with max|grad| = 0.0053551
@@ -423,7 +446,7 @@ dat &lt;- sim(nsub = 100, nclust = 100, sigma_residual2 = .2,  sig_b2 = c(.3, 1)
 <h2>Finding an algorithm that works</h2>
 <p>Using allFit(), we can see if different optimizers might give us better results. It uses parallel processing (if available) to run multiple fits at once, which really speeds things up. <strong>maxfun</strong> sets the maximum number of iterations, though I have had R freeze up sometimes when I make that value too high. In this case, 1e6 works.</p>
 <pre class="r"><code>ncores &lt;- detectCores()
-diff_optims &lt;- allFit(model, maxfun = 1e6, parallel = 'multicore', ncpus = ncores)</code></pre>
+diff_optims &lt;- allFit(model, maxfun = 1e5, parallel = 'multicore', ncpus = ncores)</code></pre>
 <pre><code>## Loading required namespace: dfoptim</code></pre>
 <pre class="r"><code>is.OK &lt;- sapply(diff_optims, is, &quot;merMod&quot;)
 diff_optims.OK &lt;- diff_optims[is.OK]
@@ -473,11 +496,7 @@ model3 &lt;- lmer(y ~ arm + (1 + arm | clustid), data = dat,
 ## control$checkConv, : Model failed to converge with max|grad| = 0.0053551
 ## (tol = 0.002, component 1)</code></pre>
 <p>We already knew that these algorithms wouldn’t converge in this case, but in another situation those other algorithms might be needed.</p>
-</div>
-<div id="automatically-selecting-a-method-that-converges" class="section level2">
-<h2>Automatically selecting a method that converges</h2>
-<p>Here’s some very unsophisticated R code to select methods that converges and ignore the rest.</p>
-<p>Interestingly, for the two models that converged, the estimates of the ‘arm’ standard deviation and correlation with the intercept are quite different. However, when transforming those values into the original parameters, we find that they are two ways of getting to the same values.</p>
+<p>Let’s look at the model fits for the two algos that converged. Interestingly, the estimates of the ‘arm’ standard deviation and correlation with the intercept are quite different. However, when transforming those values into the original parameters, we find that they are two ways of getting to the same values.</p>
 <pre class="r"><code>convergence_results &lt;- lapply(diff_optims.OK,function(x) x@optinfo$conv$lme4$messages)
 working_indices &lt;- sapply(convergence_results, is.null)
 diff_optims[working_indices]</code></pre>
@@ -533,6 +552,33 @@ sig_b2_n_m</code></pre>
 <pre class="r"><code>sig_b2_nlmin</code></pre>
 <pre><code>## [1] 0.4128502 0.9701111</code></pre>
 </div>
+<div id="automatically-selecting-a-method-that-converges" class="section level2">
+<h2>Automatically selecting a method that converges</h2>
+<p>It would be nice to automate this so that we could use whatever method converges and only be notified if <em>none</em> of them converge. Here’s some code for that, with a bit of duplication from the last chunk:</p>
+<pre class="r"><code>convergence_results &lt;- lapply(diff_optims.OK,function(x) x@optinfo$conv$lme4$messages)
+working_indices &lt;- sapply(convergence_results, is.null)
+if(length(working_indices)==0){
+  print(&quot;No algorithms from allFit converged.&quot;)
+  print(&quot;You may still be able to use the results, but proceed with extreme caution.&quot;)
+  first_fit &lt;- NULL
+} else {
+  first_fit &lt;- diff_optims[working_indices][[1]]
+}
+first_fit</code></pre>
+<pre><code>## Linear mixed model fit by REML ['lmerMod']
+## Formula: y ~ arm + (1 + arm | clustid)
+##    Data: dat
+## REML criterion at convergence: 25886.66
+## Random effects:
+##  Groups   Name        Std.Dev. Corr
+##  clustid  (Intercept) 0.6425       
+##           arm         0.5765   0.30
+##  Residual             0.4490       
+## Number of obs: 20000, groups:  clustid, 200
+## Fixed Effects:
+## (Intercept)          arm  
+##    -0.01099      1.03935</code></pre>
+</div>
 <div id="what-if-no-method-converges" class="section level2">
 <h2>What if no method converges?</h2>
 <p>If none of the algorithms converge, you may not be stuck yet. In lme4’s documentation (see ?lme4::convergence), they note that you may still be able to use the results, though there is not universal agreement about that. Here are some links that could help in that situation and provide further info:</p>
@@ -540,6 +586,7 @@ sig_b2_n_m</code></pre>
 <p><a href="https://rstudio-pubs-static.s3.amazonaws.com/33653_57fc7b8e5d484c909b615d8633c01d51.html">Examples of other approaches to acheiving convergence besides just switching the algorithm</a></p>
 <p><a href="https://cran.r-project.org/web/packages/lme4/vignettes/lmerperf.html">Tricks for speeding up model fitting</a></p>
 <p><a href="https://stats.stackexchange.com/questions/110004/how-scared-should-we-be-about-convergence-warnings-in-lme4">More general discussion of convergence, very illuminating</a></p>
+</div>
 </div>
 
 
