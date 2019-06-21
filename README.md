@@ -10,13 +10,14 @@ Before enetering the PhD program, I was a high school math teacher (and chainsaw
 <br/>
 <br/>
 
-## Current Research Projects
+## Current projects, in no particular order
  + Power calculations for individually randomized group treatment trials
  
  + Comparing approaches to nested frailty models in survival analysis
 
+ + [Here's](https://joshua-nugent.github.io/allFit/) a vignette on using the allFit() function to find the right algorithm for convergence in lmer/glmer.
+
  + Investigating bias in penalized quasi-likelihood (PQL) estimation for generalized linear mixed models with dichotomous outcomes (paper in process)
  
-And [here's](https://joshua-nugent.github.io/allFit/) a vignette on using the allFit() function to find the right algorithm for convergence in lmer/glmer: 
 
 <img align = "bottom" src="images/bias_pql_sbs1.png" alt="Bias in PQL estimation (plot)">
