@@ -9,7 +9,7 @@
 <meta name="generator" content="pandoc" />
 
 
-<meta name="author" content="Josh Nugent" />
+<meta name="author" content="Josh Nugent - jnugent@umass.edu" />
 
 
 <title>Using allFit() with (g)lmer</title>
@@ -375,7 +375,7 @@ $(document).ready(function () {
 
 
 <h1 class="title toc-ignore">Using allFit() with (g)lmer</h1>
-<h4 class="author">Josh Nugent</h4>
+<h4 class="author">Josh Nugent - <a href="mailto:jnugent@umass.edu" class="email">jnugent@umass.edu</a></h4>
 
 </div>
 
@@ -411,9 +411,9 @@ library(optimx)</code></pre>
 set.seed(2)
 dat &lt;- sim(nsub = 100, nclust = 100, sigma_residual2 = .2,  sig_b2 = c(.3, 1), betas = c(0,1))</code></pre>
 </div>
-<div id="no-convergence-with-default-settings" class="section level2">
-<h2>No convergence with default settings</h2>
-<p>With our data in hand, let’s fit a model that allows for different cluster-level variances in the two arms. We get a convergence error.</p>
+<div id="convergence-fails-with-default-settings" class="section level2">
+<h2>Convergence fails with default settings</h2>
+<p>With our data in hand, let’s fit a model that allows for different cluster-level variances in the two arms. We get a convergence error. Not surprising given the purpose of this vignette.</p>
 <pre class="r"><code>model &lt;- lmer(y ~ arm + (1 + arm | clustid), data = dat)</code></pre>
 <pre><code>## Warning in checkConv(attr(opt, &quot;derivs&quot;), opt$par, ctrl =
 ## control$checkConv, : Model failed to converge with max|grad| = 0.0053551
@@ -451,7 +451,7 @@ lapply(diff_optims.OK,function(x) x@optinfo$conv$lme4$messages)</code></pre>
 ## 
 ## $nloptwrap.NLOPT_LN_BOBYQA
 ## [1] &quot;Model failed to converge with max|grad| = 0.0053551 (tol = 0.002, component 1)&quot;</code></pre>
-<p>“NULL” is what we want to see here - that means there were no error or warning messages. While many algorithms did not converge, it looks like Nelder_Mead and nlminbwrap did. Yay! Further, these two algorithms are built in to lme4, so we do not require the optimx or nloptr packages (at least for now). Let’s check those and see if we are correct.</p>
+<p>“NULL” is what we want to see here - that means there were no error or warning messages when that particular algorithm was run. While most algorithms did not converge, it looks like Nelder_Mead and nlminbwrap did. Yay! Further, these two algorithms are built in to lme4, so we do not require the optimx or nloptr packages (at least for now). Let’s check those and see if we are correct.</p>
 <pre class="r"><code>model2 &lt;- lmer(y ~ arm + (1 + arm | clustid), data = dat,
                control = lmerControl(optimizer = &quot;Nelder_Mead&quot;))
 model3 &lt;- lmer(y ~ arm + (1 + arm | clustid), data = dat,
@@ -472,10 +472,66 @@ model3 &lt;- lmer(y ~ arm + (1 + arm | clustid), data = dat,
 <pre><code>## Warning in checkConv(attr(opt, &quot;derivs&quot;), opt$par, ctrl =
 ## control$checkConv, : Model failed to converge with max|grad| = 0.0053551
 ## (tol = 0.002, component 1)</code></pre>
-<p>We already knew that these wouldn’t converge for our data, but in another situation those other algorithms might be needed.</p>
+<p>We already knew that these algorithms wouldn’t converge in this case, but in another situation those other algorithms might be needed.</p>
 </div>
 <div id="automatically-selecting-a-method-that-converges" class="section level2">
 <h2>Automatically selecting a method that converges</h2>
+<p>Here’s some very unsophisticated R code to select methods that converges and ignore the rest.</p>
+<p>Interestingly, for the two models that converged, the estimates of the ‘arm’ standard deviation and correlation with the intercept are quite different. However, when transforming those values into the original parameters, we find that they are two ways of getting to the same values.</p>
+<pre class="r"><code>convergence_results &lt;- lapply(diff_optims.OK,function(x) x@optinfo$conv$lme4$messages)
+working_indices &lt;- sapply(convergence_results, is.null)
+diff_optims[working_indices]</code></pre>
+<pre><code>## $Nelder_Mead
+## Linear mixed model fit by REML ['lmerMod']
+## Formula: y ~ arm + (1 + arm | clustid)
+##    Data: dat
+## REML criterion at convergence: 25886.66
+## Random effects:
+##  Groups   Name        Std.Dev. Corr
+##  clustid  (Intercept) 0.6425       
+##           arm         0.5765   0.30
+##  Residual             0.4490       
+## Number of obs: 20000, groups:  clustid, 200
+## Fixed Effects:
+## (Intercept)          arm  
+##    -0.01099      1.03935  
+## 
+## $nlminbwrap
+## Linear mixed model fit by REML ['lmerMod']
+## Formula: y ~ arm + (1 + arm | clustid)
+##    Data: dat
+## REML criterion at convergence: 25886.66
+## Random effects:
+##  Groups   Name        Std.Dev. Corr 
+##  clustid  (Intercept) 0.6425        
+##           arm         0.8273   -0.12
+##  Residual             0.4490        
+## Number of obs: 20000, groups:  clustid, 200
+## Fixed Effects:
+## (Intercept)          arm  
+##    -0.01099      1.03935</code></pre>
+<pre class="r"><code>n_m_model &lt;- diff_optims[working_indices][[1]]
+nlminb_model &lt;- diff_optims[working_indices][[2]]
+
+# Extract parameters to check
+sig_b2_n_m &lt;- vector(length = 2)
+random_effects_n_m &lt;- as.data.frame(VarCorr(n_m_model)$clustid)
+corrmatrix_n_m &lt;- as.data.frame(VarCorr(n_m_model))$sdcor
+sig_b2_n_m[1] &lt;- random_effects_n_m[1,1]
+sig_b2_n_m[2] &lt;- random_effects_n_m[1,1] + random_effects_n_m[2,2] + 
+  2*sqrt(random_effects_n_m[1,1])*sqrt(random_effects_n_m[2,2])*corrmatrix_n_m[3]
+
+sig_b2_nlmin &lt;- vector(length = 2)
+random_effects_nlmin &lt;- as.data.frame(VarCorr(nlminb_model)$clustid)
+corrmatrix_nlmin &lt;- as.data.frame(VarCorr(nlminb_model))$sdcor
+sig_b2_nlmin[1] &lt;- random_effects_nlmin[1,1]
+sig_b2_nlmin[2] &lt;- random_effects_nlmin[1,1] + random_effects_nlmin[2,2] + 
+  2*sqrt(random_effects_nlmin[1,1])*sqrt(random_effects_nlmin[2,2])*corrmatrix_nlmin[3]
+
+sig_b2_n_m</code></pre>
+<pre><code>## [1] 0.4128517 0.9701112</code></pre>
+<pre class="r"><code>sig_b2_nlmin</code></pre>
+<pre><code>## [1] 0.4128502 0.9701111</code></pre>
 </div>
 <div id="what-if-no-method-converges" class="section level2">
 <h2>What if no method converges?</h2>
