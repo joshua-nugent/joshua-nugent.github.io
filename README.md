@@ -10,12 +10,14 @@ Before enetering the PhD program, I was a high school math teacher (and chainsaw
 <br/>
 <br/>
 
-## Current projects, in no particular order
+## Current projects and explainers, in no particular order
  + Power calculations for individually randomized group treatment trials
  
  + Comparing approaches to nested frailty models in survival analysis
 
  + [Here's](https://joshua-nugent.github.io/allFit/) a vignette on using the allFit() function to find the right algorithm for convergence in lmer/glmer.
+
+ + [Here's](https://joshua-nugent.github.io/maximin/) a vignette explaining how maximin approaches can be used when planning a cluster randomized trial in the face of uncertainty.
 
  + Investigating bias in penalized quasi-likelihood (PQL) estimation for generalized linear mixed models with dichotomous outcomes (paper in process)
  
