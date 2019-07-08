@@ -391,8 +391,8 @@ fit_stats &lt;- as.data.frame(readRDS(file = &quot;fit_stats_2000sims_sigb2pt1bo
 <h1>Defining our terms</h1>
 <p>In this document I’ll refer to the Type I error rate where the data analyst fits a model that does <em>not</em> allow for different ICCs across treatment arms as the “naive TIE rate”. Allowing for different ICCs by arm will be called the “flexible” approach.</p>
 </div>
-<div id="comparing-naive-and-flexible-marginalizing-over-all-icc-value-combinations" class="section level1">
-<h1>Comparing naive and flexible, marginalizing over all ICC value combinations</h1>
+<div id="comparing-naive-and-flexible-across-all-icc-value-combinations" class="section level1">
+<h1>Comparing naive and flexible, across all ICC value combinations</h1>
 <p>First, here is all of the data for this run of 5000 simulations - various combinations of cluster size, number of clusters, and icc values by arm. Here you can see that the naive TIE rate is always greater than or equal to the flexible TIE rate.</p>
 <pre class="r"><code>ggplot(data = alpha_cost5000) +
   geom_point(aes(x = TIE_flexible, y = TIE_naive, color = as.factor(nsub), shape = as.factor(nclust))) +
