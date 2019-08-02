@@ -17,7 +17,7 @@ Before enetering the PhD program, I was a high school math teacher (and chainsaw
 
  + [Impact on Type I error rates](https://joshua-nugent.github.io/alphacost/) if you don't allow for varying ICC across treatment arms in a cluster randomized trial
  
- + [Here's](https://joshua-nugent.github.io/allFit/) a vignette on using the allFit() function to find the right algorithm for convergence in lmer/glmer.
+ + [Here's](https://joshua-nugent.github.io/allFit/) a vignette on adjusting settings, trying different optimizers, and/or using the allFit() function to get convergence in lmer/glmer mixed models.
 
  + [Here's](https://joshua-nugent.github.io/maximin/) a vignette explaining how maximin approaches can be used when planning a cluster randomized trial in the face of uncertainty.
 
