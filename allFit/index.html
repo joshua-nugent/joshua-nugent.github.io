@@ -1754,9 +1754,9 @@ first_fit</code></pre>
 <div id="power-user-settings-if-allfit-doesnt-work" class="section level1">
 <h1>Power User settings if allFit() doesn’t work</h1>
 <p>One downside of using allFit() is that you can’t customize convergence/optimizer settings - you have to use the defaults. (At least, I haven’t figured out how to make it work with custom settings; please contact me if you know how to do so.) Yet changing the settings (increasing the maximum number of iterations, lowering the stopping tolerances, etc) can greatly improve convergence, though sometimes at the cost of slower fitting time. Here is some simple code you can use that might help your algorithm converge.</p>
-<div id="pretty-good-idea-change-settings-andor-try-some-optimx-optimizers" class="section level2">
-<h2>Pretty Good Idea: Change settings and/or try some optimx optimizers</h2>
-<p>Let’s try the default optimizer with better settings and see if it works. Note that this is almost the same call in that first <strong>model</strong> we tried to fit.</p>
+<div id="first-step-change-settings" class="section level2">
+<h2>First Step: Change settings</h2>
+<p>Let’s try the default optimizer with better settings and see if it works. Note that this is almost the same call in that first model we tried to fit, just with more specified options.</p>
 <pre class="r"><code>model5 &lt;- lmer(y ~ arm + (1 + arm | clustid),
                data = dat,
                control = lmerControl(optCtrl = list(maxit = 1e9,
@@ -1793,18 +1793,36 @@ summary(model5)</code></pre>
 ## Correlation of Fixed Effects:
 ##     (Intr)
 ## arm -0.547</code></pre>
-<p>Yay! No errors or warnings. That was easy. What if it hadn’t converged? Below we use optimx with nlminb AND the better optimizer settings, and it works. Note that earlier, we had also tried another optimx algorithm and it failed.</p>
-<pre class="r"><code>model6 &lt;- lmer(y ~ arm + (1 + arm | clustid),
-               data = dat,
-               control = lmerControl(optimizer = &quot;optimx&quot;,
-                                     optCtrl = list(method = &quot;nlminb&quot;,
-                                                    maxit = 1e9)))
-summary(model6)</code></pre>
-<pre><code>## Linear mixed model fit by REML ['lmerMod']
+<p>Yay! No errors or warnings. That was easy. But what if it hadn’t converged?</p>
+</div>
+<div id="second-step-amp-up-settings-and-loop-through-optimx-optimizers" class="section level2">
+<h2>Second Step: Amp up settings and loop through optimx optimizers</h2>
+<p>Below we loop through some of <strong>optimx</strong>’s optimizer choices AND the better optimizer settings. These choices have worked for me in mixed models; for more info see the <strong>optimx</strong> documentation.</p>
+<pre class="r"><code>optimx_options &lt;- c(&quot;L-BFGS-B&quot;, &quot;nlminb&quot;, &quot;nlm&quot;, &quot;bobyqa&quot;, &quot;nmkb&quot;, &quot;hjkb&quot;)
+
+for(i in 1:length(optimx_options)){
+  model_flex &lt;- lmer(y ~ arm + (1 + arm | clustid),
+                     data = dat,
+                     control = lmerControl(optimizer = &quot;optimx&quot;,
+                                           optCtrl = list(method = optimx_options[i],
+                                                                   maxit = 1e9)))
+  if(is.null(model_flex@optinfo$conv$lme4$messages)){
+    print(paste0(&quot;One of the optimx options, &quot;, optimx_options[i],&quot;, worked!&quot;))
+    print(summary(model_flex))
+    break
+  }
+}</code></pre>
+<pre><code>## Warning in checkConv(attr(opt, &quot;derivs&quot;), opt$par, ctrl =
+## control$checkConv, : unable to evaluate scaled gradient</code></pre>
+<pre><code>## Warning in checkConv(attr(opt, &quot;derivs&quot;), opt$par, ctrl =
+## control$checkConv, : Model failed to converge: degenerate Hessian with 1
+## negative eigenvalues</code></pre>
+<pre><code>## [1] &quot;One of the optimx options, nlminb, worked!&quot;
+## Linear mixed model fit by REML ['lmerMod']
 ## Formula: y ~ arm + (1 + arm | clustid)
 ##    Data: dat
 ## Control: 
-## lmerControl(optimizer = &quot;optimx&quot;, optCtrl = list(method = &quot;nlminb&quot;,  
+## lmerControl(optimizer = &quot;optimx&quot;, optCtrl = list(method = optimx_options[i],  
 ##     maxit = 1e+09))
 ## 
 ## REML criterion at convergence: 25886.7
@@ -1828,10 +1846,9 @@ summary(model6)</code></pre>
 ## Correlation of Fixed Effects:
 ##     (Intr)
 ## arm -0.547</code></pre>
-<p>Again, no convergence warnings or errors. I haven’t looked into all of the algorithm options for optimx, but the point is that you should increase the number of iterations, tighten the tolerances, and try different algorithms as a first step to see if they will fix your problem.</p>
 </div>
-<div id="really-good-idea-using-nloptwrap-optimizers-in-a-loop" class="section level2">
-<h2>Really Good Idea: Using nloptwrap optimizers in a loop</h2>
+<div id="third-step-amp-up-settings-and-loop-through-nloptwrap-optimizers" class="section level2">
+<h2>Third Step: Amp up settings and loop through nloptwrap optimizers</h2>
 <p>The <strong>nloptwrap</strong> set of optimizers is a little easier to use, because it uses the same option control formatting as the default. It also has a large (20+) set of algorithm options, and it’s easy to cycle through them in a for loop to find one that might work, all with the customized settings that you want. Note that here the first several options do NOT work, before settling on BOBYQA.</p>
 <pre class="r"><code># More options are here: nloptr::nloptr.print.options() under &quot;algorithm&quot;,
 # but the set below seem to work most of the time.
