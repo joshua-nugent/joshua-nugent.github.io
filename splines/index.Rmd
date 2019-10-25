@@ -1,0 +1,184 @@
+---
+title: "Spline Notes"
+subtitle: "draft / work in progress!"
+author: "Josh Nugent"
+output: html_document
+---
+
+### Load useful packages etc...
+
+```{r warning = F, message = F}
+library(splines)
+library(tidyverse)
+library(mgcv)
+knitr::opts_chunk$set(fig.height=3, fig.width=6, fig.align='center', warning = F, message = F)
+```
+
+# Linear Splines
+
+### Mathematical model
+
+Instead of a single regression line, we fit a set of piecewise linear regressions with the only restriction being that they intersect at the **knots**. Mathematically, with one predictor variable, we write the regression equation as follows:
+
+$$
+E[y_i] = \beta_0 + \beta_1x_i+\sum_{k=1}^K b_k(x_i-\xi_k)_+ 
+$$
+
+where
+
+$$
+(x_i-\xi_k)_+ = 
+\begin{cases} 
+    0 & x_i < \xi_k \\
+    (x_i-\xi_k) & x_i \geq \xi_k 
+\end{cases}
+$$
+
+where K is the number of knots. For a simple example, imagine you have one knot. Evaluating the sum, you can see that the term $b_k(x_i-\xi_k)$ will only change the expression for $x$-values greater than the knot. For those $x$-values above the knot, the regression function is $\mathbb{E}[y_i] = \beta_0 + \beta_1x_i + b_k(x_i-\xi_k)$, meaning there is an 'added amount of slope' $b_k$. Let's look at this visually:
+
+```{r}
+knot <- 3 # This is the location of our (in this case single) knot
+x <- seq(from = 0, to = 6, by = .025)
+y <- sin(2*x) + x -.1*x^2 + 2 + rnorm(length(x), sd = .3)
+
+design_matrix_X <- cbind(outer(x,1:1,"^"),outer(x,knot,">") * outer(x,knot,"-")^1)
+
+mod_ls <- lm(y~design_matrix_X)
+ggplot() +
+  geom_point(aes(x = x, y = y), color = "black", alpha = .5) +
+  geom_line(aes(x = x, y = predict(mod_ls)), color = "red") +
+  geom_vline(aes(xintercept = knot), alpha = .5, linetype = "dotdash") +
+  labs(title = "Piecewise linear spline... not a great fit!")
+```
+
+### interpreting coefficients
+
+Here are the coefficients from our model:
+
+```{r}
+summary(mod_ls)$coef
+```
+### Design matrix, calculating coefficients
+
+
+
+
+
+
+
+
+# Polynomial Splines
+
+### Mathematical model
+
+A linear spline is of course a special case of the more general polynomial spline, where the sections between knots are polynomials of degree $D$.
+
+
+
+### Problem: The Edges
+
+If you've ever seen a Taylor series in Calculus class or fit a polynomial function to a set of points, you have probably seen how polynomials can really freak out around the edges.
+
+
+Big idea: We need piecewise cubic polynomials that minimize error but also have matching 1st and 2nd derivatives. I think the format of the cubic basis
+
+Cubic splines microexample?
+
+```{r}
+x <- 0:6
+knot <- 3
+D <- 2
+
+(X <- cbind(outer(x,1:D,"^"),outer(x,knot,">") * outer(x,knot,"-")^D))
+
+knot2 <- c(2, 4)
+(X2 <- cbind(outer(x,1:D,"^"),outer(x,knot2,">") * outer(x,knot2,"-")^D))
+
+D3 <- 3
+(X3 <- cbind(outer(x,1:D3,"^"),outer(x,knot,">") * outer(x,knot,"-")^D3))
+
+(X23 <- cbind(outer(x,1:D3,"^"),outer(x,knot2,">") * outer(x,knot2,"-")^D3))
+
+
+x <- seq(from = 0, to = 6, by = .025)
+y <- sin(2*x) + x -.1*x^2 + 2 + rnorm(length(x), sd = .3)
+X <- cbind(outer(x,1:D,"^"),outer(x,knot,">") * outer(x,knot,"-")^D)
+
+mod2 <- lm(y ~ X) #summary(mod2)
+modbs <- lm(y~bs(x, knots = knot, degree = 2))
+ggplot() + geom_point(aes(x = x, y = y), color = "black", alpha = .3) +
+  geom_line(aes(x = x, y = predict(mod2)), color = "red") +
+  geom_vline(aes(xintercept = knot), alpha = .5, linetype = "dotdash") +
+  geom_line(aes(x = x, y = predict(modbs)), linetype = "dotdash")
+
+knot <- c(2, 5)
+ggplot() + geom_point(aes(x = x, y = y), color = "black", alpha = .3) +
+  geom_vline(aes(xintercept = knot), alpha = .5, linetype = "dotdash") +
+  geom_line(aes(x = x, y = predict(lm(y~bs(x, knots = knot, degree = 2)))), color = "red")
+
+knot <- c(1, 3, 5)
+ggplot() + geom_point(aes(x = x, y = y), color = "black", alpha = .3) +
+  geom_vline(aes(xintercept = knot), alpha = .5, linetype = "dotdash") +
+  geom_line(aes(x = x, y = predict(lm(y~bs(x, knots = knot, degree = 2)))), color = "red")
+
+knot <- c(1, 3, 5)
+ggplot() + geom_point(aes(x = x, y = y), color = "black", alpha = .3) +
+  geom_vline(aes(xintercept = knot), alpha = .5, linetype = "dotdash") +
+  geom_line(aes(x = x, y = predict(lm(y~bs(x, knots = knot, degree = 30)))), color = "red") +
+  labs(title = "bad... polynomials in between knots have too high a degree, overfitting")
+
+knot <- seq(from=.5, to = 5.5, by = .2)
+ggplot() + geom_point(aes(x = x, y = y), color = "black", alpha = .3) +
+  geom_vline(aes(xintercept = knot), alpha = .5, linetype = "dotdash") +
+  geom_line(aes(x = x, y = predict(lm(y~bs(x, knots = knot, degree = 2)))), color = "red") +
+  labs(title = "bad... too many knots, overfitting")
+
+```
+
+
+
+```{r}
+x <- runif(n = 200, max = 10)
+y <- sin(2*x) + x -.1*x^2 + 2 + rnorm(length(x), sd = .3)
+knots <- c(1, 4)
+basis <- bs(x, knots = knots)
+dat <- cbind.data.frame(y, basis)
+mod <- lm(y~basis, data = dat)
+ggplot() + geom_point(aes(x = x, y = y), color = "black") +
+  geom_line(aes(x = x, y = predict(mod)), color = "red") +
+  geom_vline(aes(xintercept = knots))
+
+knots <- c(1, 7)
+basis <- bs(x, knots = knots)
+dat <- cbind.data.frame(y, basis)
+mod <- lm(y~basis, data = dat)
+ggplot() + geom_point(aes(x = x, y = y), color = "black") +
+  geom_line(aes(x = x, y = predict(mod)), color = "red") +
+  geom_vline(aes(xintercept = knots))
+
+extrapX <- seq(10, 20, by = .1)
+basis <- bs(extrapX, knots = knots)
+extrapY <- predict(mod, newdata = basis)
+ggplot() + geom_point(aes(x = x, y = y), color = "black") +
+  geom_line(aes(x = extrapX, y = extrapY), color = "red") +
+  geom_vline(aes(xintercept = knots)) +
+  labs(title="EXTRAPOLATION - NOT CURRENTLY CORRECT")
+
+```
+
+
+
+
+# Controlling overfitting / underfitting via CV
+
+Cross-validation is a general tool for tuning models to not be too simple (underfit, with high bias and low variance) or too complex (overfit, with low bias and high variance).
+
+The general idea is to fit models of varying complexity on subsets of the data, then test them on the left-out sets. The models that have the 'best' level of complexity will have the least error on the held-out test data.
+
+
+
+
+
+
+
+
