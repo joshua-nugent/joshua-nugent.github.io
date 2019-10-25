@@ -7,6 +7,7 @@
 <meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
 
@@ -268,7 +269,6 @@ code {
 }
 img {
   max-width:100%;
-  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
@@ -342,18 +342,6 @@ summary {
 }
 </style>
 
-<script>
-$(document).ready(function () {
-  window.buildTabsets("TOC");
-});
-
-$(document).ready(function () {
-  $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
-  });
-});
-</script>
-
 <!-- code folding -->
 
 
@@ -389,6 +377,7 @@ $(document).ready(function () {
 <li><p><a href="https://joshua-nugent.github.io/alphacost/">Impact on Type I error rates</a> if you don’t allow for varying ICC across treatment arms in a cluster randomized trial</p></li>
 <li><p><a href="https://joshua-nugent.github.io/allFit/">Here’s</a> a vignette on adjusting settings, trying different optimizers, and/or using the allFit() function to get convergence in lmer/glmer mixed models</p></li>
 <li><p><a href="https://joshua-nugent.github.io/maximin/">Here’s</a> a vignette explaining how maximin approaches can be used when planning a cluster randomized trial in the face of uncertainty</p></li>
+<li><p><a href="https://joshua-nugent.github.io/splines/">Here’s</a> a very accessible vignette on how splines work in regression</p></li>
 <li><p>Investigating bias in penalized quasi-likelihood (PQL) estimation for generalized linear mixed models with dichotomous outcomes (paper in process)</p></li>
 </ul>
 </div>
@@ -410,6 +399,23 @@ $(document).ready(function () {
 
 
 </script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
 <script>
