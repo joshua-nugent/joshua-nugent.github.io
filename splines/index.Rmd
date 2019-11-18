@@ -1,9 +1,11 @@
 ---
-title: "Spline Notes"
-subtitle: "draft / work in progress!"
+title: "Spline Notes for STAT 625 Project, Fall 2019"
+subtitle: "Work in progress.."
 author: "Josh Nugent"
 output: html_document
 ---
+
+Heavily indebted to various internet sources.
 
 ### Load useful packages etc...
 
@@ -13,13 +15,14 @@ library(tidyverse)
 library(mgcv)
 library(pander)
 knitr::opts_chunk$set(fig.height=3, fig.width=6, fig.align='center', warning = F, message = F)
+set.seed(1)
 ```
 
 # Linear Splines
 
 ### Mathematical model
 
-Instead of a single regression line, we fit a set of piecewise linear regressions with the only restriction being that they intersect at the **knots**. Mathematically, with one predictor variable, we write the regression equation as follows:
+Instead of a single regression line, we fit a set of piecewise linear regressions with the only restriction being that they intersect at the **knots**. Mathematically, with one predictor variable, we write the regression equation as follows. Note that we have K + 2 parameters to estimate.
 
 $$
 \begin{equation}
@@ -129,10 +132,15 @@ One way to keep the model from overfitting is to put a constraint on $\sum b_k^2
 Under this constraint, it can be shown (derivation omitted) that the OLS estimator for the coefficients is:
 
 $$
+\begin{equation}
+\tag{4}
 \hat{\boldsymbol{\beta}}=(\mathbf{X}^{T} \mathbf{X}+\lambda^{2} \mathbf{D})^{-1} \mathbf{X}^{T} \mathbf{y}
+\end{equation}
 $$
 
-Using that result to investigate 
+Where $\mathbf{D}$ is a matrix of all zeros, except on the diagonal, where the first two terms are zero (for $\beta_0$ and $\beta_1$) and the rest of the diagonal terms are 1 (for all of the constrained $b_k$s).
+
+Using that result to investigate different penalty levels for our data set:
 
 ```{r}
 x <- seq(from = 0, to = 6, by = .025)
@@ -151,90 +159,120 @@ ggplot() +
   geom_line(aes(x = x, y = yhat.5), color = "black", alpha = 1) +
   geom_line(aes(x = x, y = yhat3), color = "green", alpha = 1) +
   geom_line(aes(x = x, y = yhatbad), color = "red", alpha = 1) +
-  labs(title = "lambda = 0, .5, 3")
+  labs(title = "lambda = 0 (overfit), .5 (good), 3 (underfit)")
 ```
 
 ## Choosing $\lambda$ via cross-validation
 
+As in many applications, we can use cross-validation to select the best balance of bias and variance to minimize the mean squared error. Here we'll do 5-fold CV to find a value of $lambda$ somewhere between 0 and 1. I'm also going to reduce the number of knots to make the matrix inversions possible.
+
+```{r}
+library(caret)
+
+knot_vector = seq(from = 0.1, to = 5.9, by = .4)
+D <- diag(c(0,0,rep(1, times = length(knot_vector))))
+
+k <- 5
+fold_indices <- createFolds(x, k = k)
+lambda_grid <- seq(from = 0, to = 1, by = .01)
+results <- matrix(data = NA, nrow = k, ncol = length(lambda_grid))
+
+for(j in 1:length(lambda_grid)){
+    for(i in 1:k){
+      X_test <- cbind(1, generate_design_matrix(degree = 1, knot_vector = knot_vector, x = x[fold_indices[[i]]]))
+      X_train <- cbind(1, generate_design_matrix(degree = 1, knot_vector = knot_vector, x = x[-fold_indices[[i]]]))
+      betas_train <- solve(t(X_train) %*% X_train + (lambda_grid[j]^2) * D) %*% t(X_train) %*% y[-fold_indices[[i]]]
+      y_test <- X_test %*% betas_train
+      mse <- mean((y[fold_indices[[i]]] - y_test)^2)
+      results[i,j] <- mse
+    }
+}
+CV_mse <- colMeans(results)
+
+ggplot() +
+  geom_line(aes(x = lambda_grid, y = CV_mse), color = "black", alpha = 1) +
+  labs(title = "MSE", y = "Average MSE across the 5 folds", x = "lambda value")
+```
+
+The lowest MSE occurrs when $\lambda$ is about $.25$ Let's fit the whole data set with that value and examine the results:
+
+```{r}
+D <- diag(c(0,0,rep(1, times = length(knot_vector))))
+X <- cbind(1, generate_design_matrix(degree = 1, knot_vector = knot_vector, x = x))
+betas_CV <- solve(t(X) %*% X + (.25^2) * D) %*% t(X) %*% y
+yhatCV <- X %*% betas_CV
+ggplot() +
+  geom_point(aes(x = x, y = y), color = "black", alpha = .3) +
+  geom_line(aes(x = x, y = yhatCV), color = "black", alpha = 1) +
+  labs(title = "lambda = .25... looks like a pretty good fit for these knot choices.")
+```
 
 
-
-
-
-
-
+An obvious downside of the above is that most real-world processes don't have the sharp changes in slope implied by the model fit above. In fact, linear splines are a pretty crude way to model a non-linear relationship, so we're going to move to a more advanced technique. However, the reason we went through the linear spline example in such detail is that the big ideas (building the design matrix, estimation, and penalization for over/underfitting) are almost the same, but it's easier to build the intuition with the simple linear case.
 
 # Polynomial Splines
 
+Polynomial splines address the concern of jagged splines by using piecewise polynomials (usually of degree 3) that connect at the knot points and *whose derivatives also match at the knot points*, making for a smooth curve through the data. The same concerns of over/underfitting are present 
+
 ### Mathematical model
 
-A linear spline is of course a special case of the more general polynomial spline, where the sections between knots are polynomials of degree $D$.
+A linear spline is of course a special case of the more general polynomial spline, where the sections between knots are polynomials of degree $D$. The formula below is equivalent to the linear spline formula, but with added polynomial terms. We now have D + K + 1 parameters to estimate.
 
+$$
+\begin{equation}
+\tag{5}
+E[y_i]=\beta_{0}+\beta_{1} x_i+\ldots \beta_{D} x_i^{D}+\sum_{k=1}^{K} b_{k}\left(x_i-\xi_{k}\right)_{+}^{D}
+\end{equation}
+$$
 
-
-### Problem: The Edges
-
-If you've ever seen a Taylor series in Calculus class or fit a polynomial function to a set of points, you have probably seen how polynomials can really freak out around the edges.
-
-
-Big idea: We need piecewise cubic polynomials that minimize error but also have matching 1st and 2nd derivatives. I think the format of the cubic basis
-
-Cubic splines microexample?
+We generate the design matrix in the same way, just with many more terms. Apply to our data set:
 
 ```{r}
-x <- 0:6
-knot <- 3
-D <- 2
+X <- cbind(1, generate_design_matrix(degree = 3, knot_vector = c(2), x = x))
+betas <- solve(t(X) %*% X) %*% t(X) %*% y
+yhat <- X %*% betas
+ggplot() +
+  geom_point(aes(x = x, y = y), color = "black", alpha = .3) +
+  geom_line(aes(x = x, y = yhat), color = "black", alpha = 1) +
+  geom_vline(aes(xintercept = 2), color = "black", linetype = "dotdash") +
+  labs(title = "Cubic spline, 1 knot at 2, no penalization",
+       subtitle = "Because of derivative-matching constraint, it's underfitting")
 
-(X <- cbind(outer(x,1:D,"^"),outer(x,knot,">") * outer(x,knot,"-")^D))
+X <- cbind(1, generate_design_matrix(degree = 3, knot_vector = seq(.2, 5.8, .2), x = x))
+betas <- solve(t(X) %*% X) %*% t(X) %*% y
+yhat <- X %*% betas
+ggplot() +
+  geom_point(aes(x = x, y = y), color = "black", alpha = .3) +
+  geom_line(aes(x = x, y = yhat), color = "black", alpha = 1) +
+  geom_vline(aes(xintercept = seq(.2, 5.8, .2)), color = "black", alpha = .5, linetype = "dotdash") +
+  labs(title = "Cubic spline",
+       subtitle = "Too many knots, no penalization, overfitting!")
+```
 
-knot2 <- c(2, 4)
-(X2 <- cbind(outer(x,1:D,"^"),outer(x,knot2,">") * outer(x,knot2,"-")^D))
+We can apply the same cross-validated penalization routine to get an appropriate fit to our data. Note that we can also increase the degree of the polynomial to add flexibility to the model, but the danger of overfitting is even more pronounced.
 
-D3 <- 3
-(X3 <- cbind(outer(x,1:D3,"^"),outer(x,knot,">") * outer(x,knot,"-")^D3))
-
-(X23 <- cbind(outer(x,1:D3,"^"),outer(x,knot2,">") * outer(x,knot2,"-")^D3))
-
-
-x <- seq(from = 0, to = 6, by = .025)
-y <- sin(2*x) + x -.1*x^2 + 2 + rnorm(length(x), sd = .3)
-X <- cbind(outer(x,1:D,"^"),outer(x,knot,">") * outer(x,knot,"-")^D)
-
-mod2 <- lm(y ~ X) #summary(mod2)
-modbs <- lm(y~bs(x, knots = knot, degree = 2))
-ggplot() + geom_point(aes(x = x, y = y), color = "black", alpha = .3) +
-  geom_line(aes(x = x, y = predict(mod2)), color = "red") +
-  geom_vline(aes(xintercept = knot), alpha = .5, linetype = "dotdash") +
-  geom_line(aes(x = x, y = predict(modbs)), linetype = "dotdash")
-
-knot <- c(2, 5)
-ggplot() + geom_point(aes(x = x, y = y), color = "black", alpha = .3) +
-  geom_vline(aes(xintercept = knot), alpha = .5, linetype = "dotdash") +
-  geom_line(aes(x = x, y = predict(lm(y~bs(x, knots = knot, degree = 2)))), color = "red")
-
-knot <- c(1, 3, 5)
+```{r}
+# We haven't explained the "bs" function yet, stay tuned...
+modbs <- lm(y~bs(x, knots = c(3), degree = 50))
 ggplot() + geom_point(aes(x = x, y = y), color = "black", alpha = .3) +
   geom_vline(aes(xintercept = knot), alpha = .5, linetype = "dotdash") +
-  geom_line(aes(x = x, y = predict(lm(y~bs(x, knots = knot, degree = 2)))), color = "red")
-
-knot <- c(1, 3, 5)
-ggplot() + geom_point(aes(x = x, y = y), color = "black", alpha = .3) +
-  geom_vline(aes(xintercept = knot), alpha = .5, linetype = "dotdash") +
-  geom_line(aes(x = x, y = predict(lm(y~bs(x, knots = knot, degree = 30)))), color = "red") +
-  labs(title = "bad... polynomials in between knots have too high a degree, overfitting")
-
-knot <- seq(from=.5, to = 5.5, by = .2)
-ggplot() + geom_point(aes(x = x, y = y), color = "black", alpha = .3) +
-  geom_vline(aes(xintercept = knot), alpha = .5, linetype = "dotdash") +
-  geom_line(aes(x = x, y = predict(lm(y~bs(x, knots = knot, degree = 2)))), color = "red") +
-  labs(title = "bad... too many knots, overfitting")
-
+  geom_line(aes(x = x, y = predict(modbs)), color = "red") +
+  labs(title = "Only one knot... but 50th degree polynomials obviously overfit!",
+       subtitle = "Also, note that the function is less smooth far from the knot")
 ```
 
 
 
-```{r}
+### Using B-splines instead of cubic splines as shown above
+
+Depending on the data set, making the design matrix for a bunch of cubed $x_i$ values can lead to some very large (and very small) values and make the fitting algorithm unstable. Also, the spline can get very wiggly and unstable around the edges, as there are no knots to anchor it beyond the range of our data.
+
+
+
+
+
+
+```
 x <- runif(n = 200, max = 10)
 y <- sin(2*x) + x -.1*x^2 + 2 + rnorm(length(x), sd = .3)
 knots <- c(1, 4)
@@ -265,12 +303,6 @@ ggplot() + geom_point(aes(x = x, y = y), color = "black") +
 
 
 
-
-# Controlling overfitting / underfitting via CV
-
-Cross-validation is a general tool for tuning models to not be too simple (underfit, with high bias and low variance) or too complex (overfit, with low bias and high variance).
-
-The general idea is to fit models of varying complexity on subsets of the data, then test them on the left-out sets. The models that have the 'best' level of complexity will have the least error on the held-out test data.
 
 
 
