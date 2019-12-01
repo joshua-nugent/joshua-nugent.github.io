@@ -363,7 +363,6 @@ summary {
 
 
 <h1 class="title toc-ignore">Spline Notes for STAT 625 Project, Fall 2019</h1>
-<h3 class="subtitle">WORK IN PROGRESS</h3>
 <h4 class="author">Josh Nugent</h4>
 
 </div>
@@ -624,9 +623,10 @@ ggplot() + geom_point(aes(x = x, y = y), color = &quot;black&quot;, alpha = .3) 
 </div>
 <div id="inference" class="section level1">
 <h1><span class="header-section-number">4</span> Inference</h1>
+<p>Generally, individual spline coeffifients are not of interest. More commonly, we ask if the addition of the spline lead to better model fit than a one-coefficient linear model. Without penalization, confidence bands for the spline can be calculated pointwise in the same manner as OLS regression. Also, since splines essentially create ‘multiple coefficients’ for each modeled variable, we can use full/reduced <span class="math inline">\(F\)</span> tests to check for improvement in fit of the model with and without a spline. When using a penalized spline, bootstrap procedures can be used to get empirical confidence bands or distribution of full/reduced model statistics.</p>
 </div>
 <div id="take-home-messages" class="section level1">
-<h1><span class="header-section-number">5</span> Take-home messages:</h1>
+<h1><span class="header-section-number">5</span> Take-home messages</h1>
 <ul>
 <li><p>Polynomial splines of degree &gt;3 are rarely useful. Since the first and second derivatives will match at each knot, they will be smooth to the human eye. If you want to overfit your data, just use more knots rather than a higher degree.</p></li>
 <li><p>Penalization is genereally preferred over choosing specific knots, unless you have specific subject matter knowledge that you want to build your knots around.</p></li>

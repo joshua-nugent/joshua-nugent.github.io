@@ -1,6 +1,5 @@
 ---
 title: "Spline Notes for STAT 625 Project, Fall 2019"
-subtitle: "WORK IN PROGRESS"
 author: "Josh Nugent"
 output:
   html_document:
@@ -300,8 +299,11 @@ This can be remedied by re-parameterizing the spline function as the sum of a se
 
 # Inference
 
+Generally, individual spline coeffifients are not of interest. More commonly, we ask if the addition of the spline lead to better model fit than a one-coefficient linear model. Without penalization, confidence bands for the spline can be calculated pointwise in the same manner as OLS regression. Also, since splines essentially create 'multiple coefficients' for each modeled variable, we can use full/reduced $F$ tests to check for improvement in fit of the model with and without a spline. When using a penalized spline, bootstrap procedures can be used to get empirical confidence bands or distribution of full/reduced model statistics.
 
-# Take-home messages:
+
+
+# Take-home messages
 
  + Polynomial splines of degree >3 are rarely useful. Since the first and second derivatives will match at each knot, they will be smooth to the human eye. If you want to overfit your data, just use more knots rather than  a higher degree.
  
