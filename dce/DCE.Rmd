@@ -1,0 +1,173 @@
+---
+title: "Discrete Choice Experiments"
+subtitle: "a very drafty work in progress"
+author: "Josh Nugent"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    number_sections: true  ## if you want number sections at each table header
+bibliography: DCE.bib
+csl: bmj.csl
+---
+
+```{r echo = F, message = F, warning=F}
+library(survival)
+library(AlgDesign)
+library(support.CEs)
+library(mlogit)
+```
+
+
+# Overview
+
+Goal: Assess stated preferences and tradeoffs between different alternatives in  attribute values for a service. Based on **random utility model** from economics/marketing. Allows for more efficient targeting of resources to maximize uptake. Also allows for differing preferences by covariates (age, sex, etc).
+
+Revealed preference data is almost always preferable to stated preference data, but it's not possible (too resource-intensive) to perform an experiment to test the actual uptake of services / preferences for different alternatives under different combinations of factors.
+
+Older attempts at determining preferences simply asked for lists of attributes that were important, or rankings of them, which did not allow policymakers to asses the relative values of attributes.
+
+Two DCEs examples from the health care literature, in Africa: Used to determine the best avenues to pursue in reducing attrition among health care workers in Malawi [@mangham_employment_2008], and examine patient preferences for different hospital quality attrubutes in Zambia [@hanson_preferences_2005].
+
+# First step : Create choice sets
+
+Create set of attributes and levels therein and then make a full factorial set of all possible combinations. Determining the attributes to test and the levels of each attribute is difficult, there is no "standard" way to do so [@louviere_discrete_2010]. Some guidance is given in [@mangham_how_2009]: Local knowledge should be taken into account, as well as literacy of participants and other on-the-ground factors from people who are in the community or local government... outside researchers likely do not know the best range of options to present.
+
+Toy example:
+
+```{r warning = F, message = F}
+location <- c("club", "clinic")
+modality <- c("lecture", "counseling")
+time_of_day <- c("morning", "midday", "night")
+```
+
+```{r warning = F, message = F, echo = F}
+choices <- interaction(location, modality, time_of_day) #choices <- expand.grid(location, modality, time_of_day)
+for(i in 1:2){
+  for(j in i:2){
+    print(paste0("Would you prefer ", choices[i], " or ", choices[j], "?"))
+  }
+  if(i+j==4){
+    print("... etc")
+  }
+}
+```
+
+The full factorial set with $Q$ attributes $q=1, 2,\dots,Q$ with $l_q$ levels in each, the number of combinations will be $\prod_q l_q=C$, and if creating binary choice sets for each possible pair, we end up with $(C)(C-1)/2$ total pairs - a prohibitive number even for small $Q$ and $l_q$. Hence, in most settings, the full factorial set will be far too large, so we instead create a maximally efficient **fractional factorial** subset.
+
+## Fractional factorial design
+
+Goals for the FF design [@street_designing_2008]:
+
+- Orthogonal: Groupings of levels are as uncorrelated as possible. For any two attributes, all combinations of pairs appear with proportional frequencies
+- Level balanced: All levels of all attributes are occurring equally often
+
+However, these two are not always simultaneously possible, some tradeoffs may be needed.
+
+Additional goals:
+
+- Efficiency: D-Efficiency - keep SEs of parameter estimates low by maximizing the determinant of the variance-covariance matrix. Easy for main-effects only, more complex when interactions included
+- Minimal overlap: in a single choice set, levels should repeat themselves as little as possible
+- Utility balance: Options within a choice set should be equally attractive (rarely possible to know ahead of time)
+
+Various methods exist to generate good fractional designs, there is a whole literature to be dug into. (Josh: Recall "Optimal Orthogonal Designs".)
+
+
+If "none of the above" option is listed (or choice set is binary Case A / Case B), uptake can be predicted. Otherwise, it can be maximized but not predicted.
+
+## Practical notes
+
+Typically each participant is offered several choice sets in one sitting, though even with a fractional factorial set, they likely not recieve all of the choice set combinations.
+
+Asking participants to rank too many options may cause fatigue; possible that participants will adopt simple heuristic rules and not consider all attributes, making results less reliable. Recommendations vary on the definition of 'too many', however... may need pre-testing [@mangham_how_2009][@noauthor_how_2012].
+
+
+# Second step: Collect data
+
+Offer the fractional factorial set to the participants, collect their preferences. Random effects can/should be added to tbe model to account for repeated meansurements (see data analysis section below). Some guidance exists on the construction of the surveys [@louviere_stated_2000]. One paper suggests that results seem fairly insensitive to the ordering of attributes in the surveys [@ryan_sensitivity_2000].
+
+## Sample size calculation
+
+Literature exists on this, but I haven't looked into it enough yet. Obviously depends on various features of the design. Seems pretty straightforward.
+
+
+
+# Third step: Analyze data
+
+## Random utility model
+
+Based on work by McFadden[@mcfadden_conditional_1973]. Utility for bundle/option $i$ for person $n$ is a linear function of the characteristics $V_{in}$, which includes information about option $i$, $X_i$ as well as the covariates (age, sex) $Z_n$ for that person:
+
+$$
+\begin{aligned}
+U_{in} &= V_{in} +\epsilon_{in}\\
+V_{in} &= X_{in}' \beta + Z_n' \gamma
+\end{aligned}
+$$
+
+We have not included interactions between covariates and characteristics in the above model, but we could.
+
+Given options $i$ and $j$, $i \neq j$, the person will choose $i$ if the $\epsilon$ terms don't wash out the systematic difference in utility:
+
+$$
+\epsilon_{jn} - \epsilon_{in} <V_{in}-V_{jn}
+$$
+and thus, defining the choice as $Y$,
+$$
+P(Y= i) = P(\epsilon_{jn} - \epsilon_{in} <V_{in}-V_{jn})
+$$
+
+Assumptions about the distribution of $\epsilon_{nj} - \epsilon_{ni}$ lead to different models. A mathematically convenient assumption is the Gumbel distribution, sometimes called the extreme value type 1 distribution, with mode 0 and variance $\mu^2\pi^2/6$, with $\mu$ a positive scale parameter. It is usually set to 1 unless you have two or more data sets that you can use to estimate it. (We also assume iid errors.) In this case, we have a logit model (see section below) and, following [@lancsar_conducting_2008], 
+
+$$
+P(Y= i) = \frac{\exp\{\mu V_{in}\}}{\sum_{j=1}^{J} \exp\{\mu V_{jn}\}}
+$$
+
+MLEs for $\beta$ are estimated with relative ease.
+
+If there are more than two options, then a multinomial logit model is used. In this case, there is an added assumption of "IIA" [@ryan_using_2003]: **I**ndependence compared to **I**rrelevant **A**lternatives. This means that the ratio of probabilities for any two alternatives does not depend on attribute levels of a third alternative. Further, the multinomial and does not allow for multiple observations (? need to check this). There are some recent papers that may allow for the relaxing of these assumptions, but I haven't read them yet. Also, IIA may be a more reasonable assumption in some scenarios than others. An LRT-based test of the IIA assumption exists (Hausman and McFadden 1984).
+
+## Logit model specification - Binary choice
+
+Assuming binary choices (*"Would you choose A? Yes/No?"* or *"Would you choose A or B?"*) in each choice set, and the Gumbel error distribution, we can employ either a standard logistic regression on the differences, or a conditional logistic regression.
+
+First, given choice set $\mathbf{x}_i, \mathbf{x}_j$, let 
+
+$$
+logit(P(Y=i | \mathbf{x}_i, \mathbf{x}_j)) = \beta_0+\beta_1(x_{1i}-x_{1h}) + \beta_2(x_{2i}-x_{2h}) + \dots + \beta_k(x_{ki}-x_{kh}) + (\epsilon_i - \epsilon_j)
+$$
+
+In this case, the end result is a coefficient estimate for every possible pair of levels in an attribute. For example, we would have a coefficient for `Morning.vs.Night`, `Midday.vs.Night`, and `Morning.vs.Midday` from our `time_of_day` attribute. The ratio of any two $\beta_k$ parameters show the marginal rate of substitution between them[@ryan_using_2003].
+
+
+Notes:
+
+- Probit models can also be used. For binary choices, this assumes that $\epsilon \sim N(0, \sigma^2)$. Computationally difficult in multinomial case
+- Random effects can (often must) be included in the models (multiple results per participant)
+- Common but not necessarily good: Interactions are rarely included; only main effects. Some studies have found interaction effects to be minimal, but there is no theoretical reason to exclude them beyond usual regression concerns about overfitting and *df*. Same for transformations, if appropriate [@street_designing_2008]
+- Often some type of price / cost / payment / time is included in economic models in order to estimate a willingness to pay (WTP) for a one-unit change in some other attribute
+- If "no choice" is an option, utility is assigned essentially as an intercept only, called an "alternative specific constant" ($ASC$) in the literature. In any given bundle $i$, the $\beta_0$ term is often referred to as $ASC_i$
+- Parametric... are non-parametric options possible?
+
+
+## Logit model specification - Three or more choices
+
+Multinomial logistic regression. Summary of this incomplete.
+
+Well documented in literature.
+
+# Possible application to SEARCH
+
+> From LB email: "As part of the new proposal, we are planning to offer Dynamic Choice HIV Prevention for young adults (15-24yo) through community-based clubs, which integrate life-skills/vocational training with HIV/reproductive health education. Through these clubs, we are also hoping to learn about and optimize strategies for family planning services: which modalities and how delivered (e.g. club, clinic, or home)? Are Discrete Choice Experiments a good option for such learning/optimization?"
+
+I think DCEs could be a good option for this.
+
+
+# Additional Notes
+
+- Some new methods in "best-worst scaling" appearing, may have some added benefits. Haven't looked into them yet.
+
+
+# References
+
