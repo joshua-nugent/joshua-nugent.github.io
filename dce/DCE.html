@@ -1593,6 +1593,26 @@ P(Y= i) = \frac{\exp\{\mu V_{in}\}}{\sum_{j=1}^{J} \exp\{\mu V_{jn}\}}
 logit(P(Y=i | \mathbf{x}_i, \mathbf{x}_j)) = \beta_0+\beta_1(x_{1i}-x_{1h}) + \beta_2(x_{2i}-x_{2h}) + \dots + \beta_k(x_{ki}-x_{kh}) + (\epsilon_i - \epsilon_j)
 \]</span></p>
 <p>In this case, the end result is a coefficient estimate for every possible pair of levels in an attribute. For example, we would have a coefficient for <code>Morning.vs.Night</code>, <code>Midday.vs.Night</code>, and <code>Morning.vs.Midday</code> from our <code>time_of_day</code> attribute. The ratio of any two <span class="math inline">\(\beta_k\)</span> parameters show the marginal rate of substitution between them<span class="citation">[11]</span>.</p>
+<p>Using conditional logistic regression on a different dataset… incomplete.</p>
+<pre class="r"><code>head(tm_binary)</code></pre>
+<pre><code>##   individual mode choice wait vcost travel gcost income size choice_bin
+## 1          1  air     no   69    59    100    70     35    1          0
+## 2          1  car    yes    0    10    180    30     35    1          1
+## 3          2  air     no   64    58     68    68     30    2          0
+## 4          2  car    yes    0    11    255    50     30    2          1
+## 5          3  air     no   69   115    125   129     40    1          0
+## 6          3  car    yes    0    23    720   101     40    1          1</code></pre>
+<pre class="r"><code>summary(clogit(choice_bin ~ gcost + travel + wait + strata(individual), data = tm_binary))$coef</code></pre>
+<pre><code>##                coef exp(coef)    se(coef)         z     Pr(&gt;|z|)
+## gcost   0.052070940 1.0534505 0.011420360  4.559483 5.127961e-06
+## travel -0.007065506 0.9929594 0.001424465 -4.960113 7.045211e-07
+## wait   -0.062460637 0.9394500 0.011713400 -5.332409 9.691850e-08</code></pre>
+<p>Same thing with standard regression without an intercept: Need to reformat the data first a bit.</p>
+<pre class="r"><code>summary(glm(choice_bin ~ 0 + gcostDiff + travelDiff + waitDiff, data = tm_b22, family = binomial))$coefficients</code></pre>
+<pre><code>##                Estimate  Std. Error   z value     Pr(&gt;|z|)
+## gcostDiff   0.052070941 0.011420334  4.559494 5.127712e-06
+## travelDiff -0.007065506 0.001424462 -4.960123 7.044873e-07
+## waitDiff   -0.062460637 0.011713380 -5.332418 9.691361e-08</code></pre>
 <p>Notes:</p>
 <ul>
 <li>Probit models can also be used. For binary choices, this assumes that <span class="math inline">\(\epsilon \sim N(0, \sigma^2)\)</span>. Computationally difficult in multinomial case</li>
@@ -1607,9 +1627,7 @@ logit(P(Y=i | \mathbf{x}_i, \mathbf{x}_j)) = \beta_0+\beta_1(x_{1i}-x_{1h}) + \b
 <h2><span class="header-section-number">4.3</span> Logit model specification - Three or more choices</h2>
 <p>Multinomial logistic regression. Summary of this incomplete. Well documented in literature.</p>
 <p>Example below cribbed from <span class="citation">[12]</span>. Four choices of travel options presented in each choice set: air, train, bus, car. Attributes include travel time, generalized cost, etc. Covariates of household income and party size also collected. Some attributes, like vehicle cost, only apply to some options, and “car” is the reference level.</p>
-<pre class="r"><code>library(AER)
-data(&quot;TravelMode&quot;, package = &quot;AER&quot;)
-TM &lt;- mlogit.data(TravelMode, choice = &quot;choice&quot;, shape = &quot;long&quot;, 
+<pre class="r"><code>TM &lt;- mlogit.data(TravelMode, choice = &quot;choice&quot;, shape = &quot;long&quot;, 
                   chid.var = &quot;individual&quot;, alt.var = &quot;mode&quot;, drop.index = TRUE)
 head(TM)</code></pre>
 <pre><code>##         choice wait vcost travel gcost income size
@@ -1619,14 +1637,6 @@ head(TM)</code></pre>
 ## 1.car     TRUE    0    10    180    30     35    1
 ## 2.air    FALSE   64    58     68    68     30    2
 ## 2.train  FALSE   44    31    354    84     30    2</code></pre>
-<pre class="r"><code>head(TravelMode)</code></pre>
-<pre><code>##   individual  mode choice wait vcost travel gcost income size
-## 1          1   air     no   69    59    100    70     35    1
-## 2          1 train     no   34    31    372    71     35    1
-## 3          1   bus     no   35    25    417    70     35    1
-## 4          1   car    yes    0    10    180    30     35    1
-## 5          2   air     no   64    58     68    68     30    2
-## 6          2 train     no   44    31    354    84     30    2</code></pre>
 <pre class="r"><code>ml.TM &lt;- mlogit(choice ~ gcost +wait +travel, TM, reflevel = &quot;car&quot;)
 summary(ml.TM)</code></pre>
 <pre><code>## 

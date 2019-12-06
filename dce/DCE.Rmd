@@ -15,6 +15,7 @@ csl: bmj.csl
 ```{r echo = F, message = F, warning=F}
 library(survival)
 library(AlgDesign)
+library(tidyverse)
 library(support.CEs)
 library(mlogit)
 library(AER)
@@ -141,6 +142,44 @@ $$
 
 In this case, the end result is a coefficient estimate for every possible pair of levels in an attribute. For example, we would have a coefficient for `Morning.vs.Night`, `Midday.vs.Night`, and `Morning.vs.Midday` from our `time_of_day` attribute. The ratio of any two $\beta_k$ parameters show the marginal rate of substitution between them[@ryan_using_2003].
 
+Using conditional logistic regression on a different dataset... incomplete.
+
+```{r echo = F}
+data("TravelMode", package = "AER")
+library(tidyverse)
+tm_binary <- TravelMode %>% filter(mode %in% c("air", "car"))
+indx<-NULL
+for (i in unique(tm_binary$individual)){
+  temp <- tm_binary %>% filter(individual==i)
+  if(temp$choice[1]==temp$choice[2]){
+    indx<-as.numeric(c(indx,i))
+  }
+}
+'%ni%' <- Negate('%in%')
+tm_binary <- tm_binary %>% filter(individual %ni% indx)
+tm_binary$choice_bin <- (as.numeric((tm_binary$choice)) - 1)
+```
+
+```{r}
+head(tm_binary)
+summary(clogit(choice_bin ~ gcost + travel + wait + strata(individual), data = tm_binary))$coef
+```
+
+Same thing with standard regression without an intercept: Need to reformat the data first a bit.
+
+```{r echo = F}
+tm_b2 <- tm_binary
+tm_odd <- tm_b2[c(TRUE,FALSE),]
+tm_even <- tm_b2[c(FALSE,TRUE),]
+tm_b22 <- tm_odd
+tm_b22$gcostDiff <- tm_odd$gcost - tm_even$gcost
+tm_b22$travelDiff <- tm_odd$travel - tm_even$travel
+tm_b22$waitDiff <- tm_odd$wait - tm_even$wait
+```
+
+```{r}
+summary(glm(choice_bin ~ 0 + gcostDiff + travelDiff + waitDiff, data = tm_b22, family = binomial))$coefficients
+```
 
 Notes:
 
@@ -159,12 +198,9 @@ Multinomial logistic regression. Summary of this incomplete. Well documented in 
 Example below cribbed from [@chen_discrete_nodate]. Four choices of travel options presented in each choice set: air, train, bus, car. Attributes include travel time, generalized cost, etc. Covariates of household income and party size also collected. Some attributes, like vehicle cost, only apply to some options, and "car" is the reference level.
 
 ```{r}
-library(AER)
-data("TravelMode", package = "AER")
 TM <- mlogit.data(TravelMode, choice = "choice", shape = "long", 
                   chid.var = "individual", alt.var = "mode", drop.index = TRUE)
 head(TM)
-head(TravelMode)
 ml.TM <- mlogit(choice ~ gcost +wait +travel, TM, reflevel = "car")
 summary(ml.TM)
 ```
