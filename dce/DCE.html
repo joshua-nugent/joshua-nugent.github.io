@@ -1605,8 +1605,58 @@ logit(P(Y=i | \mathbf{x}_i, \mathbf{x}_j)) = \beta_0+\beta_1(x_{1i}-x_{1h}) + \b
 </div>
 <div id="logit-model-specification---three-or-more-choices" class="section level2">
 <h2><span class="header-section-number">4.3</span> Logit model specification - Three or more choices</h2>
-<p>Multinomial logistic regression. Summary of this incomplete.</p>
-<p>Well documented in literature.</p>
+<p>Multinomial logistic regression. Summary of this incomplete. Well documented in literature.</p>
+<p>Example below cribbed from <span class="citation">[12]</span>. Four choices of travel options presented in each choice set: air, train, bus, car. Attributes include travel time, generalized cost, etc. Covariates of household income and party size also collected. Some attributes, like vehicle cost, only apply to some options, and “car” is the reference level.</p>
+<pre class="r"><code>library(AER)
+data(&quot;TravelMode&quot;, package = &quot;AER&quot;)
+TM &lt;- mlogit.data(TravelMode, choice = &quot;choice&quot;, shape = &quot;long&quot;, 
+                  chid.var = &quot;individual&quot;, alt.var = &quot;mode&quot;, drop.index = TRUE)
+head(TM)</code></pre>
+<pre><code>##         choice wait vcost travel gcost income size
+## 1.air    FALSE   69    59    100    70     35    1
+## 1.train  FALSE   34    31    372    71     35    1
+## 1.bus    FALSE   35    25    417    70     35    1
+## 1.car     TRUE    0    10    180    30     35    1
+## 2.air    FALSE   64    58     68    68     30    2
+## 2.train  FALSE   44    31    354    84     30    2</code></pre>
+<pre class="r"><code>head(TravelMode)</code></pre>
+<pre><code>##   individual  mode choice wait vcost travel gcost income size
+## 1          1   air     no   69    59    100    70     35    1
+## 2          1 train     no   34    31    372    71     35    1
+## 3          1   bus     no   35    25    417    70     35    1
+## 4          1   car    yes    0    10    180    30     35    1
+## 5          2   air     no   64    58     68    68     30    2
+## 6          2 train     no   44    31    354    84     30    2</code></pre>
+<pre class="r"><code>ml.TM &lt;- mlogit(choice ~ gcost +wait +travel, TM, reflevel = &quot;car&quot;)
+summary(ml.TM)</code></pre>
+<pre><code>## 
+## Call:
+## mlogit(formula = choice ~ gcost + wait + travel, data = TM, reflevel = &quot;car&quot;, 
+##     method = &quot;nr&quot;)
+## 
+## Frequencies of alternatives:
+##     car     air   train     bus 
+## 0.28095 0.27619 0.30000 0.14286 
+## 
+## nr method
+## 5 iterations, 0h:0m:0s 
+## g'(-H)^-1g = 0.000159 
+## successive function values within tolerance limits 
+## 
+## Coefficients :
+##                     Estimate Std. Error z-value  Pr(&gt;|z|)    
+## air:(intercept)    4.0540450  0.8366245  4.8457 1.262e-06 ***
+## train:(intercept)  3.6445988  0.4427624  8.2315 2.220e-16 ***
+## bus:(intercept)    3.1957885  0.4519434  7.0712 1.536e-12 ***
+## gcost             -0.0028601  0.0060976 -0.4691  0.639032    
+## wait              -0.0974635  0.0103529 -9.4141 &lt; 2.2e-16 ***
+## travel            -0.0034895  0.0011489 -3.0371  0.002388 ** 
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Log-Likelihood: -195
+## McFadden R^2:  0.31281 
+## Likelihood ratio test : chisq = 177.52 (p.value = &lt; 2.22e-16)</code></pre>
 </div>
 </div>
 <div id="possible-application-to-search" class="section level1">
@@ -1657,6 +1707,9 @@ logit(P(Y=i | \mathbf{x}_i, \mathbf{x}_j)) = \beta_0+\beta_1(x_{1i}-x_{1h}) + \b
 </div>
 <div id="ref-ryan_using_2003">
 <p>11 Ryan M, Gerard K. Using discrete choice experiments to value health care programmes: Current practice and future research reflections. <em>Applied health economics and health policy</em> 2003;<strong>2</strong>:55–64.</p>
+</div>
+<div id="ref-chen_discrete_nodate">
+<p>12 Chen S. Discrete Choice Model Estimation in R-notes. <a href="https://rpubs.com/sallychen/313125">https://rpubs.com/sallychen/313125</a> (accessed 6 Dec 2019).</p>
 </div>
 </div>
 </div>

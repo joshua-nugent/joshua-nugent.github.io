@@ -17,6 +17,7 @@ library(survival)
 library(AlgDesign)
 library(support.CEs)
 library(mlogit)
+library(AER)
 ```
 
 
@@ -153,9 +154,21 @@ Notes:
 
 ## Logit model specification - Three or more choices
 
-Multinomial logistic regression. Summary of this incomplete.
+Multinomial logistic regression. Summary of this incomplete. Well documented in literature.
 
-Well documented in literature.
+Example below cribbed from [@chen_discrete_nodate]. Four choices of travel options presented in each choice set: air, train, bus, car. Attributes include travel time, generalized cost, etc. Covariates of household income and party size also collected. Some attributes, like vehicle cost, only apply to some options, and "car" is the reference level.
+
+```{r}
+library(AER)
+data("TravelMode", package = "AER")
+TM <- mlogit.data(TravelMode, choice = "choice", shape = "long", 
+                  chid.var = "individual", alt.var = "mode", drop.index = TRUE)
+head(TM)
+head(TravelMode)
+ml.TM <- mlogit(choice ~ gcost +wait +travel, TM, reflevel = "car")
+summary(ml.TM)
+```
+
 
 # Possible application to SEARCH
 
