@@ -1518,7 +1518,7 @@ div.tocify {
 <p>Two DCEs examples from the health care literature, in Africa: Used to determine the best avenues to pursue in reducing attrition among health care workers in Malawi <span class="citation">[1]</span>, and examine patient preferences for different hospital quality attrubutes in Zambia <span class="citation">[2]</span>.</p>
 </div>
 <div id="first-step-create-choice-sets" class="section level1">
-<h1><span class="header-section-number">2</span> First step : Create choice sets</h1>
+<h1><span class="header-section-number">2</span> First step: Create choice sets</h1>
 <p>Create set of attributes and levels therein and then make a full factorial set of all possible combinations. Determining the attributes to test and the levels of each attribute is difficult, there is no “standard” way to do so <span class="citation">[3]</span>. Some guidance is given in <span class="citation">[4]</span>: Local knowledge should be taken into account, as well as literacy of participants and other on-the-ground factors from people who are in the community or local government… outside researchers likely do not know the best range of options to present.</p>
 <p>Toy example:</p>
 <pre class="r"><code>location &lt;- c(&quot;club&quot;, &quot;clinic&quot;)
@@ -1578,12 +1578,12 @@ V_{in} &amp;= X_{in}' \beta + Z_n' \gamma
 \]</span> and thus, defining the choice as <span class="math inline">\(Y\)</span>, <span class="math display">\[
 P(Y= i) = P(\epsilon_{jn} - \epsilon_{in} &lt;V_{in}-V_{jn})
 \]</span></p>
-<p>Assumptions about the distribution of <span class="math inline">\(\epsilon_{nj} - \epsilon_{ni}\)</span> lead to different models. A mathematically convenient assumption is the Gumbel distribution, sometimes called the extreme value type 1 distribution, with mode 0 and variance <span class="math inline">\(\mu^2\pi^2/6\)</span>, with <span class="math inline">\(\mu\)</span> a positive scale parameter. It is usually set to 1 unless you have two or more data sets that you can use to estimate it. (We also assume iid errors.) In this case, we have a logit model (see section below) and, following <span class="citation">[10]</span>,</p>
+<p>Assumptions about the distribution of <span class="math inline">\(\epsilon_{nj} - \epsilon_{ni}\)</span> lead to different models. A mathematically convenient assumption is the Gumbel distribution, sometimes called the extreme value type 1 distribution, with mode 0 and variance <span class="math inline">\(\mu^2\pi^2/6\)</span>, with <span class="math inline">\(\mu\)</span> a positive scale parameter. The scale parameter is usually set to 1 unless you have two or more data sets that you can use to estimate it. (We also assume iid errors.) The difference of two Gumbel-distributed variables follows a logistic distribtion, giving us a logit model (see section below) and, following <span class="citation">[10]</span>,</p>
 <p><span class="math display">\[
 P(Y= i) = \frac{\exp\{\mu V_{in}\}}{\sum_{j=1}^{J} \exp\{\mu V_{jn}\}}
 \]</span></p>
 <p>MLEs for <span class="math inline">\(\beta\)</span> are estimated with relative ease.</p>
-<p>If there are more than two options, then a multinomial logit model is used. In this case, there is an added assumption of “IIA” <span class="citation">[11]</span>: <strong>I</strong>ndependence compared to <strong>I</strong>rrelevant <strong>A</strong>lternatives. This means that the ratio of probabilities for any two alternatives does not depend on attribute levels of a third alternative. Further, the multinomial and does not allow for multiple observations (? need to check this). There are some recent papers that may allow for the relaxing of these assumptions, but I haven’t read them yet. Also, IIA may be a more reasonable assumption in some scenarios than others. An LRT-based test of the IIA assumption exists (Hausman and McFadden 1984).</p>
+<p>If there are more than two options for the survey participant to choose, then a multinomial logit model is used. In this case, there is an added assumption of “IIA” <span class="citation">[11]</span>: <strong>I</strong>ndependence compared to <strong>I</strong>rrelevant <strong>A</strong>lternatives. This means that the ratio of probabilities for any two alternatives does not depend on attribute levels of a third alternative. Further, the multinomial and does not allow for multiple observations (? need to check this). There are some recent papers that may allow for the relaxing of these assumptions, but I haven’t read them yet. Also, IIA may be a more reasonable assumption in some scenarios than others. An LRT-based test of the IIA assumption exists (Hausman and McFadden 1984).</p>
 </div>
 <div id="logit-model-specification---binary-choice" class="section level2">
 <h2><span class="header-section-number">4.2</span> Logit model specification - Binary choice</h2>
@@ -1593,7 +1593,7 @@ P(Y= i) = \frac{\exp\{\mu V_{in}\}}{\sum_{j=1}^{J} \exp\{\mu V_{jn}\}}
 logit(P(Y=i | \mathbf{x}_i, \mathbf{x}_j)) = \beta_0+\beta_1(x_{1i}-x_{1h}) + \beta_2(x_{2i}-x_{2h}) + \dots + \beta_k(x_{ki}-x_{kh}) + (\epsilon_i - \epsilon_j)
 \]</span></p>
 <p>In this case, the end result is a coefficient estimate for every possible pair of levels in an attribute. For example, we would have a coefficient for <code>Morning.vs.Night</code>, <code>Midday.vs.Night</code>, and <code>Morning.vs.Midday</code> from our <code>time_of_day</code> attribute. The ratio of any two <span class="math inline">\(\beta_k\)</span> parameters show the marginal rate of substitution between them<span class="citation">[11]</span>.</p>
-<p>Using conditional logistic regression on a different dataset… incomplete.</p>
+<p>Using conditional logistic regression on a different dataset…</p>
 <pre class="r"><code>head(tm_binary)</code></pre>
 <pre><code>##   individual mode choice wait vcost travel gcost income size choice_bin
 ## 1          1  air     no   69    59    100    70     35    1          0
@@ -1613,6 +1613,47 @@ logit(P(Y=i | \mathbf{x}_i, \mathbf{x}_j)) = \beta_0+\beta_1(x_{1i}-x_{1h}) + \b
 ## gcostDiff   0.052070941 0.011420334  4.559494 5.127712e-06
 ## travelDiff -0.007065506 0.001424462 -4.960123 7.044873e-07
 ## waitDiff   -0.062460637 0.011713380 -5.332418 9.691361e-08</code></pre>
+<p>Same data with fake random intercept for repeated questions for each individual, simplifying the model for faster comuptation:</p>
+<pre class="r"><code>tm_b22_rint &lt;- tm_b22
+id &lt;- sort(rep_len(1:10, length.out = 117))
+tm_b22_rint &lt;- cbind.data.frame(id, tm_b22_rint)
+summary(glm(choice_bin ~ 0 + gcostDiff + waitDiff, data = tm_b22, family = binomial))$coefficients</code></pre>
+<pre><code>##               Estimate  Std. Error   z value   Pr(&gt;|z|)
+## gcostDiff  0.016719227 0.006548671  2.553072 0.01067775
+## waitDiff  -0.009337494 0.003641081 -2.564484 0.01033293</code></pre>
+<pre class="r"><code>summary(glmer(choice_bin ~ 0 + gcostDiff + waitDiff + (0 + gcostDiff + waitDiff|id),
+              data = tm_b22_rint, family = binomial))</code></pre>
+<pre><code>## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: binomial  ( logit )
+## Formula: 
+## choice_bin ~ 0 + gcostDiff + waitDiff + (0 + gcostDiff + waitDiff |  
+##     id)
+##    Data: tm_b22_rint
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##    140.4    154.2    -65.2    130.4      112 
+## 
+## Scaled residuals: 
+##      Min       1Q   Median       3Q      Max 
+## -1.95250 -0.43174 -0.01119  0.63974  2.28055 
+## 
+## Random effects:
+##  Groups Name      Variance Std.Dev. Corr 
+##  id     gcostDiff 0.001850 0.04302       
+##         waitDiff  0.001353 0.03678  -0.85
+## Number of obs: 117, groups:  id, 10
+## 
+## Fixed effects:
+##           Estimate Std. Error z value Pr(&gt;|z|)  
+## gcostDiff  0.04688    0.02230   2.102   0.0355 *
+## waitDiff  -0.02441    0.01569  -1.556   0.1198  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Correlation of Fixed Effects:
+##          gcstDf
+## waitDiff -0.845</code></pre>
 <p>Notes:</p>
 <ul>
 <li>Probit models can also be used. For binary choices, this assumes that <span class="math inline">\(\epsilon \sim N(0, \sigma^2)\)</span>. Computationally difficult in multinomial case</li>
@@ -1637,7 +1678,7 @@ head(TM)</code></pre>
 ## 1.car     TRUE    0    10    180    30     35    1
 ## 2.air    FALSE   64    58     68    68     30    2
 ## 2.train  FALSE   44    31    354    84     30    2</code></pre>
-<pre class="r"><code>ml.TM &lt;- mlogit(choice ~ gcost +wait +travel, TM, reflevel = &quot;car&quot;)
+<pre class="r"><code>ml.TM &lt;- mlogit(choice ~ gcost + wait + travel, data = TM, reflevel = &quot;car&quot;)
 summary(ml.TM)</code></pre>
 <pre><code>## 
 ## Call:
@@ -1667,6 +1708,14 @@ summary(ml.TM)</code></pre>
 ## Log-Likelihood: -195
 ## McFadden R^2:  0.31281 
 ## Likelihood ratio test : chisq = 177.52 (p.value = &lt; 2.22e-16)</code></pre>
+<p>Same thing, with an artificial random effect added for repeated measurements among participants:</p>
+<pre class="r"><code># This part doesn't work yet
+id &lt;- rep(1:21, each = 40)
+TM_rint &lt;- cbind.data.frame(id, TM)
+ml.TM_rint &lt;- mlogit(choice ~ gcost + wait + travel, data = TM_rint, panel = TRUE, reflevel = &quot;car&quot;)</code></pre>
+<pre><code>## Error in mlogit(choice ~ gcost + wait + travel, data = TM_rint, panel = TRUE, : panel is only relevant for mixed logit models</code></pre>
+<pre class="r"><code>summary(ml.TM_rint)</code></pre>
+<pre><code>## Error in summary(ml.TM_rint): object 'ml.TM_rint' not found</code></pre>
 </div>
 </div>
 <div id="possible-application-to-search" class="section level1">
