@@ -484,29 +484,39 @@ u^p_{j} &amp; \sim N(0, V_p)
 </div>
 <div id="forecasting-hospitalicu-needs-and-utilization" class="section level1">
 <h1>Forecasting hospital/ICU needs and utilization</h1>
-<div id="observed-data" class="section level2">
-<h2>Observed data</h2>
+<div id="observed-data-re-capacity" class="section level2">
+<h2>Observed data re capacity</h2>
 <p>From the paper:</p>
 <blockquote>
-<p>Data on licensed bed and ICU capacity and average annual utilization by state were obtained from the American Hospital Association. We estimated ICU utilization rates by multiplying total bed utilization rates by the ratio of ICU bed utilization rates over total bed utilization rates from a published study. Observed COVID-19 utilization data were obtained for Italy and the United States, providing information on inpatient and ICU use. Data from China were used to approximate inpatient and ICU use by assuming that severe patients were hospitalized and critical patients required an ICU stay. Other parameters were sourced from the scientific literature and an analysis of available patient data.</p>
+<p>Data on licensed bed and ICU capacity and average annual utilization by state were obtained from the American Hospital Association.</p>
 </blockquote>
 </div>
-<div id="forecasting" class="section level2">
-<h2>Forecasting</h2>
+<div id="forecasting-utilization-via-simulation" class="section level2">
+<h2>Forecasting utilization via simulation</h2>
+<p>Based on their death count projections over time, the authors work backwards to simulate hospital/ICU/ventilator usage. Their description is brief, some details unclear.</p>
+<ul>
+<li><p>Assumes all deaths occur in hospital setting.</p></li>
+<li><p>Used median length of hospital stay for ‘global line list’ (? not sure what that is), adjusted for age, to estimate hospital utilization among those who died.</p></li>
+<li><p>Used the age-specific ratio of admissions to death (averaged across China, USA, Italy) to estimate the number of contemporaneous non-death hospital admissions.</p></li>
+<li><p>Of both death- and non-death admissions, proportion needing ICU care was estimated from US data (122 ICU / 502 total) - unclear if they are updating this as more information comes in.</p></li>
+<li><p>Ventilator needs (as a subset of ICU cases) were also estimated from two small studies from China. They assume 54%, unclear if they are updating as more information comes in.</p></li>
+<li><p>“Based on analysis of available unit record data,” used median stay of 12 days for non-ICU admissions and 8 days for ICU admissions.</p></li>
+</ul>
 </div>
 </div>
-<div id="key-assumptions-to-highlight" class="section level1">
-<h1>Key assumptions to highlight</h1>
+<div id="key-assumptions-limitations-to-highlight" class="section level1">
+<h1>Key assumptions / limitations to highlight</h1>
 <ul>
 <li><p>For states that have not yet crossed the .31 per million threshold, the authors estimated “the time from the current case count to reach the threshold level for the population death rate model… then we applied the death rate epidemic curve after crossing the threshold.” This allows them to put projections for all 50 states on their web site and make national-level forecasts.</p></li>
 <li><p>Assumes social distancing will be taking place across all jurisdictions until May and that very aggressive NPIs will be in place in all locations within one week.</p></li>
 <li><p>Assumes the Wuhan trajectory will be generalizable.</p></li>
+<li><p>Hospital usage forecasts rely on parameters from a small number of countries and studies.</p></li>
 </ul>
 </div>
 <div id="critique-of-model" class="section level1">
 <h1>Critique of model</h1>
 <ul>
-<li>Carl Bergstrom has a detailed (well, for Twitter at least) <a href="https://twitter.com/CT_Bergstrom/status/1243819232950751233">critique</a> of the model, its presentation to the media, and the media’s misinterpretations of it, which seems correct to me, and has informed some of the approach of this document.</li>
+<li>Carl Bergstrom has a detailed (well, for Twitter at least) <a href="https://twitter.com/CT_Bergstrom/status/1243819232950751233">critique</a> of the model, its presentation to the media, and the media’s (mis)interpretations of it, which seems correct to me, and has informed some of the approach of this document.</li>
 </ul>
 </div>
 <div id="refs" class="section level1">
