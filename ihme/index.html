@@ -371,15 +371,15 @@ summary {
 <pre><code>## [1] &quot;Thu, Apr 02, 2020&quot;</code></pre>
 <div id="background" class="section level1">
 <h1>Background</h1>
-<p>On 30-03-2020 the <a href="https://www.medrxiv.org/content/10.1101/2020.03.27.20043752v1">preprint</a> “Forecasting COVID-19 impact on hospital bed-days, ICU-days, ventilator-days and deaths by US state in the next 4 months” was posted to medRxiv by the Institute for Health Metrics and Evaluation (IHME) and Christopher Murray <span class="citation">[@team_forecasting_2020]</span>.</p>
-<p>Since that time they have been updating their results with new data at their main web site <a href="http://www.healthdata.org/covid/updates">here</a>, though the underlying assumptions and approach have not changed as of this writing.</p>
-<p>On 31-03-2020 the Associated Press (here via the New York Times) <a href="https://www.nytimes.com/aponline/2020/03/31/us/politics/ap-us-virus-outbreak-forecasting-the-pandemic.html">reported</a> that “White House coronavirus task force adviser Dr. Deborah Birx … singled out projections by the [IHME] at the University of Washington in Seattle, suggesting that model is close to how government experts see the situation.” <span class="citation">[@press_white_2020]</span></p>
+<p>On 30-03-2020 the <a href="https://www.medrxiv.org/content/10.1101/2020.03.27.20043752v1">preprint</a> “Forecasting COVID-19 impact on hospital bed-days, ICU-days, ventilator-days and deaths by US state in the next 4 months” was posted to medRxiv by the Institute for Health Metrics and Evaluation (IHME) and Christopher Murray.</p>
+<p>Since that time they have been updating their results with new data at their main web site <a href="http://www.healthdata.org/covid/updates">here</a>, though the underlying assumptions and approach have not changed as of this writing, as far as I can tell.</p>
+<p>On 31-03-2020 the Associated Press (here via the New York Times) <a href="https://www.nytimes.com/aponline/2020/03/31/us/politics/ap-us-virus-outbreak-forecasting-the-pandemic.html">reported</a> that “White House coronavirus task force adviser Dr. Deborah Birx … singled out projections by the [IHME] at the University of Washington in Seattle, suggesting that model is close to how government experts see the situation.”</p>
 <p>I was asked to</p>
 <blockquote>
 <p>“…write-up a summary of how the IHME model works (e.g. how back-cast, how forecast, how model hospital use?)”</p>
 </blockquote>
 <p>… hopefully this helps.</p>
-<p><em>Please note that some of the language in this document is copied directly from the <a href="https://www.medrxiv.org/content/10.1101/2020.03.27.20043752v1">paper on medRxiv</a>, its <a href="https://www.medrxiv.org/highwire/filestream/74792/field_highwire_adjunct_files/0/2020.03.27.20043752-1.pdf">appedices</a>, and some <a href="https://github.com/ihmeuw-msca/CurveFit/blob/master/docs/methods.md">helpful files</a> from the authors’ GitHub repository. I omitted quotation marks because or further citations because I thought they would be distracting; please do not accuse me of plagiarism!</em></p>
+<p><em>Please note that some of the language in this document is copied directly from the <a href="https://www.medrxiv.org/content/10.1101/2020.03.27.20043752v1">paper on medRxiv</a>, its <a href="https://www.medrxiv.org/highwire/filestream/74792/field_highwire_adjunct_files/0/2020.03.27.20043752-1.pdf">appedices</a>, and some <a href="https://github.com/ihmeuw-msca/CurveFit/blob/master/docs/methods.md">helpful files</a> from the authors’ GitHub repository. I omitted quotation marks or further citations in some cases because I thought they would be distracting; please do not accuse me of plagiarism!</em></p>
 </div>
 <div id="observed-data-for-model" class="section level1">
 <h1>Observed data for model</h1>
