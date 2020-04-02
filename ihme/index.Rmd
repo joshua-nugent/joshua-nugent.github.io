@@ -1,0 +1,243 @@
+---
+title: "Summary of IHME COVID-19 Model"
+subtitle: "Compiled by Josh Nugent"
+output:
+  html_document 
+---
+
+```{r echo = F, message = F, warning=F}
+library(tidyverse)
+```
+
+This document generated on:
+
+```{r echo = F}
+format(Sys.time(), "%a, %b %d, %Y, %H:%M %p")
+```
+
+# Background
+
+On 30-03-2020 the [preprint](https://www.medrxiv.org/content/10.1101/2020.03.27.20043752v1) "Forecasting COVID-19 impact on hospital bed-days, ICU-days, ventilator-days and deaths by US state in the next 4 months" was posted to medRxiv by the Institute for Health Metrics and Evaluation (IHME) and Christopher Murray.
+
+Since that time they have been updating their results with new data at their main web site [here](http://www.healthdata.org/covid/updates), though the underlying assumptions and approach have not changed as of this writing, as far as I can tell.
+
+On 31-03-2020 the Associated Press (here via the New York Times) [reported](https://www.nytimes.com/aponline/2020/03/31/us/politics/ap-us-virus-outbreak-forecasting-the-pandemic.html) that "White House coronavirus task force adviser Dr. Deborah Birx ... singled out projections by the [IHME] at the University of Washington in Seattle, suggesting that model is close to how government experts see the situation."
+
+I was asked to
+
+> "...write-up a summary of how the IHME model works (e.g. how back-cast, how forecast, how model hospital use?)"
+
+... hopefully this helps.
+
+*Please note that some of the language in this document is copied directly from the [paper on medRxiv](https://www.medrxiv.org/content/10.1101/2020.03.27.20043752v1), its [appedices](https://www.medrxiv.org/highwire/filestream/74792/field_highwire_adjunct_files/0/2020.03.27.20043752-1.pdf), and some [helpful files](https://github.com/ihmeuw-msca/CurveFit/blob/master/docs/methods.md) from the authors' GitHub repository. I omitted quotation marks or further citations in some cases because I thought they would be distracting; please do not accuse me of plagiarism!*
+
+
+# Observed data for model
+
+* Count of deaths in different locations attributed to COVID-19, scaled by population size of the reporting location. Authors standardized these death rates by population age structure.
+
+* Included only locations with a cumulative death rate greater than .31 per million. At first print, this included 27 U.S. states and 44 other locations. (Likely more since then.)
+
+* Dates and nature of non-pharmaceutical interventions (NPIs) - social distancing recommendations, closing non-essential businesses, travel restrictions, etc. It appears they categorized them somewhat using [New Zealand's NPI hierarchy](https://covid19.govt.nz/government-actions/covid-19-alert-system/), but it's not completely clear from their paper. This data was used to create their only covariate (see below).
+
+
+# Statistical Model
+
+At its core, a Bayesian GLMM to model **log cumulative death rates** at different locations (states, cities, nursing homes, etc). By "rate" they mean per million people; it can be thought of as a per capita cumulative death count. More details:
+
+* link function is the sigmoid [error function](https://en.wikipedia.org/wiki/Error_function), which has a more extreme slope than a logistic curve (and they say fit the data better):
+
+```{r, out.width = "150px", echo = F, fig.align = 'center'}
+knitr::include_graphics("erf.png")
+```
+
+ 
+$$
+D(t ; \alpha, \beta, p)=\frac{p}{2}\left(\Psi(\alpha(t-\beta))=\frac{p}{2}\left(1+\frac{2}{\sqrt{\pi}} \int_{0}^{\alpha(t-\beta)} \exp \left(-\tau^{2}\right) d \tau\right)\right.
+$$
+
+* outcome $D(t ; \alpha, \beta, p)$ is the log cumulative death rate at time $t$
+* $\alpha$ defines the growth rate / speed of infection
+* $\beta$ is the time of the maximum growth rate, at the inflection point
+* $p$ defines the maximum level the log death rate can reach
+
+The model is fitted by specifying a model for the parameters $\alpha, \beta$, and $p$, and adding a normal error term to the function $D$ above. All are indexed by location $j$. Hence:
+
+
+**(THE FOLLOWING IS TAKEN ALMOST DIRECTLY FROM THEIR DOCUMENTS:)**
+
+- \(S_j\): social distancing covariate value at location \(j\)
+- \(y_j^t\): cumulative death rate in location \(j\) at time \(t\)
+
+- Measurement model:
+
+\[
+\begin{aligned}
+\log(y_j^t) &= \frac{p_j}{2}\left(1+ \frac{2}{\sqrt{\pi}}\int_{0}^{\alpha_j(t-\beta_j)} \exp\left(-\tau^2\right)d\tau\right) + \epsilon_{t,j} \\
+\epsilon_{t,j} & \sim N(0, V_t)
+\end{aligned}
+\]
+
+- \(\beta\)-model specification, without or with covariate:
+\[
+\begin{aligned}
+\beta_j &= \beta + \epsilon_j^\beta \\
+&\text{  or}\\
+\beta_j &= \beta + \gamma_j S_j + \epsilon_j^\beta \\
+\gamma_j &\sim N(\overline \gamma, V_\gamma) \text{ (if included in model)}\\
+\epsilon_j^\beta &\sim N(0, V_\beta)
+\end{aligned}
+\]
+- \(\alpha\)-model specification (exponential to keep it nonnegative):
+\[
+\begin{aligned}
+\alpha_j &= \exp(\alpha + u_j^\alpha) \\
+u_{\alpha, j} & \sim N(0, V_\alpha)
+\end{aligned}
+\]
+- \(p\)-model specification, without or with covariate (exponential to keep it nonnegative):
+\[
+\begin{aligned}
+p_j & = \exp(p + u_j^p)\\
+&\text{  or }\\
+p_j &= \exp(p + \delta_jS_j + u_j^p)\\
+\delta_j &\sim N(\bar{\delta}, V_\delta) \text{ (if included in model)}\\
+u^p_{j} & \sim N(0, V_p)
+\end{aligned}
+\]
+
+In this example, the user specifies
+
+- prior mean ($\overline \gamma$ or $\bar{\delta}$)
+- variance parameters ($V_t, V_\gamma, V_\delta, V_\beta, V_\alpha, V_p$).
+
+They estimate:
+
+- fixed effects ($\alpha, \beta, p$)
+- random effects ($\gamma_j, \delta_j, u_j^\alpha, u_j^\beta, u_j^p$)
+
+
+**JOSH'S INTERPRETATION & FURTHER DETAILS:**
+
+
+* $\beta$: Each location $j$ can given a different center/inflection point, $\beta+\gamma_jS_j$, which is assumed to vary depending on the covariate (level of social distancing). Notably, the inflection point was constrained to be between $t = 20$ and $t=80$ for all locations.
+
+* $\alpha$: Speed is **not** a function of the covariate, but may vary by state.
+
+* $p$: Max death rate also varies by state, and may vary by the social distancing covariate $p+\delta_jS_j$ if it is included in the model.
+
+The prior mean $\overline{\gamma}$ or $\bar{\delta}$ was estimated from Wuhan data. Short-range models were allowed a much higher variance (10x!) $V_{\gamma}$ or $V_{\delta}$ than long-range forecasts.
+
+They tested four models: Two short-range models, one including $\gamma_jS_j$ for $\beta$ and one including $\delta_jS_j$ for $p$, and two long-range models, again with one including $\gamma_jS_j$ for $\beta$ and one including $\delta_jS_j$ for $p$. Ensembles of the four models were then interpolated to create the final posterior draws.
+
+Uncertainty / confidence intervals come from the mixed model structure and do not include uncertainty about whether the model is correctly specified or whether simplifying assumptions (about, for example, the covariate) hold.
+
+Using the BLUPs from their model, they can create forecasts for any location in their dataset.
+
+# The covariate
+
+The specification of the of the covariate $S_j$ and assumptions around it are critical to the model's results. The authors write:
+
+>A covariate of days with expected exponential growth in the cumulative death rate was created using information on the number of days after the death rate exceeded 0.31 per million to the day when 4 different social distancing measures were mandated by local and national government: school closures, non-essential business closures including bars and restaurants, stay-at-home recommendations, and travel restrictions including public transport closures. Days with 1 measure were counted as 0.67 equivalents, days with 2 measures as 0.334 equivalents and with 3 or 4 measures as 0.
+
+The following sentence is key to some critiques of the model:
+
+>For states that have not yet implemented all of the closure measures, we assumed that the remaining measures will be put in place within 1 week.
+
+Their data and estimates are being revised each day as new numbers come in, but it's not clear if they are modifying the above assumption as well.
+
+>This lag between reaching a threshold death rate and implementing more aggressive social distancing was combined with the observed period of exponential growth in the cumulative death rate seen in Wuhan after Level 4 social distancing was implemented, adjusted for the median time from incidence to death. For ease of interpretation of statistical coefficients, this covariate was normalized so the value for Wuhan was 1. 
+
+It is unclear how sensitive their model is to specification of the covariate or the assumptions that all NPI will be implemented within a week.
+
+
+# Forecasting hospital/ICU needs and utilization
+
+
+## Observed data re capacity
+
+From the paper:
+
+>Data on licensed bed and ICU capacity and average annual utilization by state were obtained from the American Hospital Association.
+
+## Forecasting utilization via simulation
+
+Based on their death count projections over time, the authors work backwards to simulate hospital/ICU/ventilator usage. Their description is brief, some details unclear.
+
+* Assumes all deaths occur in hospital setting.
+
+* Used median length of hospital stay from [global line list](https://www.thelancet.com/journals/landig/article/PIIS2589-7500(20)30026-1/fulltext), adjusted for age, to estimate hospital utilization among the projected/simulated deaths over time.
+
+* Used the age-specific ratio of admissions to death (averaged across China, USA, Italy) to estimate the number of contemporaneous non-death hospital admissions.
+
+* Of both death- and non-death admissions, proportion needing ICU care was estimated from (small) US dataset (122 ICU / 502 total) - unclear if they are updating this as more information comes in.
+
+* Ventilator needs (as a subset of ICU cases) were also estimated, from two small studies from China. They assume 54%, unclear if they are updating as more information comes in.
+
+* "Based on analysis of available unit record data," used median stay of 12 days for non-ICU admissions and 8 days for ICU admissions.
+
+
+
+# Key assumptions / limitations to highlight
+
+* For states that have not yet crossed the .31 per million threshold, the authors estimated "the time from the current case count to reach the threshold level for the population death rate model... then we applied the death rate epidemic curve after crossing the threshold." This allows them to put projections for all 50 states on their web site and make national-level forecasts.
+
+* Assumes social distancing will be taking place across all jurisdictions (until when?) and that very aggressive NPIs will be in place in all locations within one week.
+
+* Assumes the Wuhan trajectory will be generalizable, that implementing 3 of the 4 social distancing measures will be equivalent to follow the Wuhan trajectory, and that each of the 4 measures have equivalent value. Assumes US adherence to social distancing will be similar to that of Wuhan.
+
+* Hospital usage forecasts rely on parameters from a small number of countries and studies.
+
+* Many covariates (by their own admission) are not included: Overall health of population, level of smoking, etc...
+
+* Considers only hospital beds and equipment; does not consider staffing/HR needs for hospitals
+
+
+# Critique of model
+
+* Carl Bergstrom has a detailed (well, for Twitter at least) [critique](https://twitter.com/CT_Bergstrom/status/1243819232950751233) of the model, its presentation to the media, and the media's (mis)interpretations of it, which seems correct to me, and has informed some of the approach of this document.
+
+
+
+
+# Refs
+
+I started a .bib file but then just decided to put links throughout the document!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

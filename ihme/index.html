@@ -367,8 +367,8 @@ summary {
 </div>
 
 
-<p>This document compiled on:</p>
-<pre><code>## [1] &quot;Thu, Apr 02, 2020&quot;</code></pre>
+<p>This document generated on:</p>
+<pre><code>## [1] &quot;Thu, Apr 02, 2020, 11:20 AM&quot;</code></pre>
 <div id="background" class="section level1">
 <h1>Background</h1>
 <p>On 30-03-2020 the <a href="https://www.medrxiv.org/content/10.1101/2020.03.27.20043752v1">preprint</a> “Forecasting COVID-19 impact on hospital bed-days, ICU-days, ventilator-days and deaths by US state in the next 4 months” was posted to medRxiv by the Institute for Health Metrics and Evaluation (IHME) and Christopher Murray.</p>
@@ -495,7 +495,7 @@ u^p_{j} &amp; \sim N(0, V_p)
 <p>Based on their death count projections over time, the authors work backwards to simulate hospital/ICU/ventilator usage. Their description is brief, some details unclear.</p>
 <ul>
 <li><p>Assumes all deaths occur in hospital setting.</p></li>
-<li><p>Used median length of hospital stay from ‘global line list’ (? not sure what that is), adjusted for age, to estimate hospital utilization among the projected/simulated deaths over time.</p></li>
+<li><p>Used median length of hospital stay from <a href="https://www.thelancet.com/journals/landig/article/PIIS2589-7500(20)30026-1/fulltext">global line list</a>, adjusted for age, to estimate hospital utilization among the projected/simulated deaths over time.</p></li>
 <li><p>Used the age-specific ratio of admissions to death (averaged across China, USA, Italy) to estimate the number of contemporaneous non-death hospital admissions.</p></li>
 <li><p>Of both death- and non-death admissions, proportion needing ICU care was estimated from (small) US dataset (122 ICU / 502 total) - unclear if they are updating this as more information comes in.</p></li>
 <li><p>Ventilator needs (as a subset of ICU cases) were also estimated, from two small studies from China. They assume 54%, unclear if they are updating as more information comes in.</p></li>
