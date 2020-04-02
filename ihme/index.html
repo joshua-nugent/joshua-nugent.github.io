@@ -368,7 +368,7 @@ summary {
 
 
 <p>This document generated on:</p>
-<pre><code>## [1] &quot;Thu, Apr 02, 2020, 11:20 AM&quot;</code></pre>
+<pre><code>## [1] &quot;Thu, Apr 02, 2020, 11:23 AM&quot;</code></pre>
 <div id="background" class="section level1">
 <h1>Background</h1>
 <p>On 30-03-2020 the <a href="https://www.medrxiv.org/content/10.1101/2020.03.27.20043752v1">preprint</a> “Forecasting COVID-19 impact on hospital bed-days, ICU-days, ventilator-days and deaths by US state in the next 4 months” was posted to medRxiv by the Institute for Health Metrics and Evaluation (IHME) and Christopher Murray.</p>
@@ -483,15 +483,15 @@ u^p_{j} &amp; \sim N(0, V_p)
 </div>
 <div id="forecasting-hospitalicu-needs-and-utilization" class="section level1">
 <h1>Forecasting hospital/ICU needs and utilization</h1>
-<div id="observed-data-re-capacity" class="section level2">
-<h2>Observed data re capacity</h2>
+<div id="observed-data-re-capacity" class="section level3">
+<h3>Observed data re capacity</h3>
 <p>From the paper:</p>
 <blockquote>
 <p>Data on licensed bed and ICU capacity and average annual utilization by state were obtained from the American Hospital Association.</p>
 </blockquote>
 </div>
-<div id="forecasting-utilization-via-simulation" class="section level2">
-<h2>Forecasting utilization via simulation</h2>
+<div id="forecasting-utilization-via-simulation" class="section level3">
+<h3>Forecasting utilization via simulation</h3>
 <p>Based on their death count projections over time, the authors work backwards to simulate hospital/ICU/ventilator usage. Their description is brief, some details unclear.</p>
 <ul>
 <li><p>Assumes all deaths occur in hospital setting.</p></li>
@@ -503,8 +503,8 @@ u^p_{j} &amp; \sim N(0, V_p)
 </ul>
 </div>
 </div>
-<div id="key-assumptions-limitations-to-highlight" class="section level1">
-<h1>Key assumptions / limitations to highlight</h1>
+<div id="key-assumptions-limitations-of-paper" class="section level1">
+<h1>Key assumptions / limitations of paper</h1>
 <ul>
 <li><p>For states that have not yet crossed the .31 per million threshold, the authors estimated “the time from the current case count to reach the threshold level for the population death rate model… then we applied the death rate epidemic curve after crossing the threshold.” This allows them to put projections for all 50 states on their web site and make national-level forecasts.</p></li>
 <li><p>Assumes social distancing will be taking place across all jurisdictions (until when?) and that very aggressive NPIs will be in place in all locations within one week.</p></li>
@@ -513,12 +513,12 @@ u^p_{j} &amp; \sim N(0, V_p)
 <li><p>Many covariates (by their own admission) are not included: Overall health of population, level of smoking, etc…</p></li>
 <li><p>Considers only hospital beds and equipment; does not consider staffing/HR needs for hospitals</p></li>
 </ul>
-</div>
-<div id="critique-of-model" class="section level1">
-<h1>Critique of model</h1>
+<div id="critique-of-model" class="section level3">
+<h3>Critique of model</h3>
 <ul>
 <li>Carl Bergstrom has a detailed (well, for Twitter at least) <a href="https://twitter.com/CT_Bergstrom/status/1243819232950751233">critique</a> of the model, its presentation to the media, and the media’s (mis)interpretations of it, which seems correct to me, and has informed some of the approach of this document.</li>
 </ul>
+</div>
 </div>
 <div id="refs" class="section level1">
 <h1>Refs</h1>

@@ -154,13 +154,13 @@ It is unclear how sensitive their model is to specification of the covariate or 
 # Forecasting hospital/ICU needs and utilization
 
 
-## Observed data re capacity
+### Observed data re capacity
 
 From the paper:
 
 >Data on licensed bed and ICU capacity and average annual utilization by state were obtained from the American Hospital Association.
 
-## Forecasting utilization via simulation
+### Forecasting utilization via simulation
 
 Based on their death count projections over time, the authors work backwards to simulate hospital/ICU/ventilator usage. Their description is brief, some details unclear.
 
@@ -178,7 +178,7 @@ Based on their death count projections over time, the authors work backwards to 
 
 
 
-# Key assumptions / limitations to highlight
+# Key assumptions / limitations of paper
 
 * For states that have not yet crossed the .31 per million threshold, the authors estimated "the time from the current case count to reach the threshold level for the population death rate model... then we applied the death rate epidemic curve after crossing the threshold." This allows them to put projections for all 50 states on their web site and make national-level forecasts.
 
@@ -193,7 +193,7 @@ Based on their death count projections over time, the authors work backwards to 
 * Considers only hospital beds and equipment; does not consider staffing/HR needs for hospitals
 
 
-# Critique of model
+### Critique of model
 
 * Carl Bergstrom has a detailed (well, for Twitter at least) [critique](https://twitter.com/CT_Bergstrom/status/1243819232950751233) of the model, its presentation to the media, and the media's (mis)interpretations of it, which seems correct to me, and has informed some of the approach of this document.
 
