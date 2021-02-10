@@ -1,0 +1,172 @@
+---
+title: "rademacher"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r include = F, message = F, warning = F}
+library(tidyverse)
+knitr::opts_chunk$set(fig.height=4,
+  fig.align='center',
+  echo = T, warning = F, message = F, collapse = F)
+```
+
+### Thing we're trying to show
+
+No formal proof here, just intuition and simulation. Trying to show that if $X_i$ and $Y_i$ are drawn from the same distribution, then
+
+$$
+\sum_{i=1}^{n} \left[f\left(X_{i}\right)-f\left(Y_{i}\right)\right]
+\text{ } \text{ } \text{  and  } \text{ } \text{ }
+\sum_{i=1}^{n} e_{i}\left[f\left(X_{i}\right)-f\left(Y_{i}\right)\right]
+$$
+
+have the same distribution.
+
+Note that $e$ is a Rademacher discrete random variable, meaning it takes two values with probability 1/2: $P(e = 1) = P(e = -1) = .5$.
+
+Having the same distribution implies that they have the same expectation, and also that any function of that data or that expectation will be the same.
+
+### Generate some data
+
+I think in class when Dr. Wang says "independent copies" she means two independent realizations of the same underlying random variable. Let's define our underlying random variable $Z \sim Gamma(1,1)$ and draw $X_i$ and $Y_i$ from it.
+
+```{r}
+set.seed(11)
+n <- 500
+x <- rgamma(n = n, shape = 1, scale = 1)
+y <- rgamma(n = n, shape = 1, scale = 1)
+e <- 2*(rbinom(n = n, size = 1, prob = .5)) - 1 # hacky but it works to make rademacher
+```
+
+```{r echo = F}
+dat <- cbind.data.frame(x, y) %>% gather(key = "realization")
+head(cbind(x, y, e))
+```
+
+```{r echo = F}
+ggplot(dat) +
+  geom_histogram(aes(x = value), color = "black", fill = "grey") +
+  facet_grid(realization~., labeller = label_both) +
+  labs(title = "Realizations of X and Y from same underlying distribution")
+```
+
+**Now we get to the big idea:** If you have a set of differences between two numbers that are functions of the same distribution, and randomly change the sign of some of the numbers, the overall distribution will look the same, because the original differences have a symmetrical distribution around zero.
+
+Put another way: Since the distribution of differences is symmetrical around zero, changing a few randomly-selected positive values to be negative and changing a few randomly-selected negative values to positive won't matter in the long run.
+
+Let's look at this step by step:
+
+Let's define an arbitrary function $f$ and get the distribution of $f(x_i) - f(y_i)$ and $e_i[f(x_i) - f(y_i)]$.
+
+```{r}
+f <- function(x){
+  return(abs(log(x)) + 5)
+}
+no_e <- f(x) - f(y)
+yes_e <- e*(f(x) - f(y))
+```
+
+Here is the distribution of the original $f(x_i) - f(y_i)$. Note the symmetry-ish-ness.
+
+```{r echo = F, fig.height = 3}
+ggplot() +
+  geom_histogram(aes(x = no_e), color = "black", fill = "grey") +
+  labs(title = "Distribution of differences, before multiplying by Rademacher variable e",
+       subtitle = "Seems symmetrical...")
+```
+
+Now, we look at the original values, and the values where some signs are permuted:
+
+```{r echo = F}
+cbind.data.frame(no_e, yes_e)[1:10,]
+```
+
+But the distribution is basically the same before and after multiplying by $e_i$:
+
+```{r echo = F}
+fdat <- cbind.data.frame(no_e = f(x) - f(y), yes_e = e*(f(x) - f(y))) %>% gather(key = "e?")
+ggplot(fdat) +
+  geom_histogram(aes(x = value), color = "black", fill = "grey") +
+  facet_grid(`e?`~., labeller = label_both) +
+  labs(title = "With and without multiplying by Rademacher variable e")
+```
+
+And finally we take the sums (actually, equivalently for our purposes, the means).
+
+```{r collapse = T}
+mean(f(x) - f(y))
+mean(e*(f(x) - f(y)))
+```
+
+They are pretty close.
+
+### Now to simulate the distribution of each sum (pre- and post-multiplying by e)...
+
+We repeat the process, collecting the sums of $\Sigma [f(X_i)-f(Y_i)]$ and $\Sigma e_i [f(X_i)-f(Y_i)]$.
+
+```{r cache = T}
+set.seed(11)
+do_a_lot <- function(n){
+  x <- rgamma(n = n, shape = 1, scale = 1)
+  y <- rgamma(n = n, shape = 1, scale = 1)
+  e <- 2*(rbinom(n = n, size = 1, prob = .5)) - 1
+  sum_no_e <- sum(f(x) - f(y))
+  sum_yes_e <- sum(e*(f(x) - f(y)))
+  return(c(sum_no_e = sum_no_e,
+           sum_yes_e = sum_yes_e))
+}
+samples <- 5000
+replicates <- 5000
+output <- data.frame(t(replicate(n = replicates, do_a_lot(n = samples)))) %>%
+  gather(key = "e?")
+```
+
+```{r echo=F}
+ggplot(output) +
+  geom_histogram(aes(x = value), color = "black", fill = "grey") +
+  facet_grid(`e?`~., labeller = label_both) +
+  labs(title = "Looking pretty similar...",
+       subtitle = paste0(replicates, " simulation runs of sample size ", samples))
+```
+
+Mean of these sums, from distributions with and without the Rademacher variable:
+
+```{r}
+mean(output$value[output$`e?`=="sum_no_e"])
+mean(output$value[output$`e?`=="sum_yes_e"])
+```
+
+Looks like the two are pretty darn close. yayyyyy.
+
+### Why does this matter?
+
+Not totally sure. Seems important to this proof we're leading up to?
+
+
+### Remember!
+
+This is simulation and intuition, not proof.
+
+
+### Housekeeping
+
+Underlying code [here](https://github.com/joshua-nugent/joshua-nugent.github.io/blob/master/rando/rademacher.Rmd).
+
+This document compiled:
+
+```{r echo = F}
+Sys.time()
+```
+
+Session info: 
+```{r echo = F}
+sessionInfo()
+```
+
+
+
+
+
+
