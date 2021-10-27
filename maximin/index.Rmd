@@ -1,0 +1,129 @@
+---
+title: "A summary of Breukelen and Candel (2015)"
+subtitle: "Maximin algorithms and sample size calculations in cluster randomized trials"
+author: "Josh Nugent"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    number_sections: false  ## if you want number sections at each table header
+---
+
+```{r message=FALSE, warning=FALSE}
+# Load required packages
+library(tidyverse)
+```
+
+# Introduction / The Big Idea
+
+The information contained herein attempts to be a user-friendly version of results presented in
+[Breukelen and Candel 2015](http://doi.org/10.1177/0962280211421344), followed on in different contexts by
+[Wu, Wong and Crespi 2017](http://doi.org/10.1111/biom.12659) and
+[Breukelen and Candel 2018](http://doi.org/10.1002/sim.7824).
+Many thanks to those authors for their work and research!
+
+When given a choice between different options in the face of uncertainty, a maximin algorithm attempts to find the choice that gives the 'least bad' worst-case scenario across all options. It produces very conservative results, since even low-probability worst-case scenarios will be included in the analysis. For example, imagine you had to pick between a \$1 lottery ticket that had a 1/100 chance of winning \$10, or a \$10 lottery ticket that had a 99/100 chance of winning \$1,000,000. The second ticket has a much larger expected value, but the worst-case scenario is that you'd lose \$10, while the first ticket's worst-case scenario is a loss of only \$1. Hence, a maximin strategy would be to limit your possible loss and pick the first ticket. Of course, this is an extreme example - it's easy to imagine other situations where a maximin algorithm would be a reasonable choice in the case of uncertainty... for example, the uncertainty of what the intraclass correlation coefficient (ICC) will be when planning a cluster randomized trial (CRT). This vignette will explore that scenario.
+
+
+# CRTs, the ICC, our model, and the design effect
+
+In a CRT, it is reasonable to assume that subjects within a cluster will not be independent - their outcomes will be correlated with one another. Hence, we get 'less information' from each data point, and need to adjust our inferences accordingly. A common way of quantifying that correlation is via the ICC. For CRTs with continuous outcomes (say, blood pressure), the ICC $\rho$ can be defined as
+$$
+\rho = \frac{\sigma_0^2}{\sigma_0^2 + \sigma_e^2}
+$$
+where $\sigma_0^2$ is the variance of the cluster means and $\sigma_e^2$ is the variance of observations within clusters. The total variance of the outcome variable $\sigma^2_y$ is $\sigma_0^2 + \sigma_e^2$, so the ICC is often thought of as the proportion of the total variance explained by cluster variability.
+
+We will model outcomes $Y_{ij}$ for observation $i$ in cluster $j$ as a random-intercept linear mixed model:
+$$
+Y_{ij} = \beta_0 + \beta_1 \cdot \text{trt}_j + u_{0j} + e_{ij}
+$$
+where $\beta_0$ is the mean outcome in the control group, $\beta_1$ is the treatment effect, $u_{0j}$ is a cluster-level random intercept $\sim N(0, \sigma^2_0)$, and residual (unexplained) error $e_{ij}\sim N(0, \sigma^2_e)$.
+
+Given data, we can estimate $\hat{\beta}_1$ using maximum likelihood. In this mixed-model framework, the variance of that estimator depends on cluster size $n$ (assumed to be equal in all clusters), number of clusters $k$, $\sigma^2_y$, and $\rho$. The smaller the variance, the more statistical power we have.
+$$
+\text{Var}(\hat{\beta}_1)=[(n-1)\rho+1] \cdot \frac{4\sigma_y^2}{nk}
+$$
+The quantity $[(n-1)\rho+1]$ is called the design effect - when the ICC is zero, we have no variation between cluster means, the design effect equals 1, and it reduces to the variance to the equivalent of that for an individually randomized trial. As the ICC rises, the design effect rises, and hence the variance of $\hat{\beta}_1$, all else being equal.
+
+Notably, increasing the number of clusters $k$ will always lower the variance of $\hat{\beta}_1$ and improve power. Increasing $n$ will also improve power, but as $n$ grows, the payoff diminishes, especially if the ICC is large. Examples:
+```{r}
+estimate_var <- function(n = 10, k = 10, icc = .1, sigma2_y = 1){
+  de <- (n-1)*icc + 1
+  var_b <- de*(4*sigma2_y)/(n*k)
+  return(var_b)
+}
+
+# Doubling clusters will always cut variance in half
+estimate_var(n = 10, k = 10, icc = .1, sigma2_y = 1)
+estimate_var(n = 10, k = 20, icc = .1, sigma2_y = 1)
+
+# Doubling n has a weaker effect
+estimate_var(n = 10, k = 10, icc = .1, sigma2_y = 1)
+estimate_var(n = 20, k = 10, icc = .1, sigma2_y = 1)
+
+# Doubling n has a very weak effect as it gets large and if ICC is high
+estimate_var(n = 100, k = 10, icc = .01, sigma2_y = 1)
+estimate_var(n = 200, k = 10, icc = .01, sigma2_y = 1)
+
+estimate_var(n = 100, k = 10, icc = .3, sigma2_y = 1)
+estimate_var(n = 200, k = 10, icc = .3, sigma2_y = 1)
+.1214 / .1228
+```
+In the last example, adding a huge number of observations in a cluster led to only about a 1% improvement in variance. As a rule of thumb, adding more clusters is better than increasing cluster size... unless...
+
+# Optimizing power given constraints on a CRT
+We've shown that adding more clusters is preferable to increasing cluster size, since our goal is to maximize our power. However, in real-world trials, it can be much more costly to add clusters than observations. For example, you might have a set of participating hospitals that you've worked with before, and enrolling more patients from those hospitals in your study is much easier than recruiting new hospitals to participate. These constraints can change your strategy to maximize power; there may be situations where adding patients is preferable to improve power given the costs. We'll work through a toy example here to illustrate Breukelen and Candel's method of finding the optimal study design.
+
+Imagine you have a fixed budget of \$1000 for your study, and the cost to add a cluster is \$50, while the cost to add a patient to each cluster is only \$1. We'll examine three linear combinations of $k$ and $n$ that satisfy those contstraints: $1000 \geq 1 \cdot kn+50 \cdot k$ leads to $(k = 4, n = 200)$, $(k = 10, n = 50)$, and $(k = 18, n = 5)$.
+
+You want to minimize the variance of your estimate, but you don't know the ICC. (You don't know $\sigma^2_y$ either, but it won't affect the relative performance across different clustering options, so we'll ignore it by setting it equal to 1.) Let's plot the variance of $\hat{\beta}_1$ under our three clustering options, across a range of somewhat plausible ICC values.
+```{r}
+iccs <- seq(from = 0, to = .25, by = .001)
+option <- rep(c("A", "B", "C"), times = length(iccs))
+n <- rep(c(200, 50, 5), times = length(iccs))
+k <- rep(c(4, 10, 18), times = length(iccs))
+dat <- cbind.data.frame(option, n, k, iccs) %>% mutate(var_b = estimate_var(n = n, k = k, icc = iccs, sigma2_y = 1))
+ggplot(data = dat) + geom_line(aes(x = iccs, y = var_b, group = option, color = option))
+```
+
+Note here that if the ICC is extremely low, option A, with the small number of large clusters, is the optimal choice, having the lowest estimator variance. If the ICC is in the middle of our range, option B is best, and if the ICC is high, option C (with the most and smallest clusters) will give the most power.
+
+To pick which design to use, we could guess at what the ICC will be from previous studies, though many don't report that value. And if we are wrong, we might have an underpowered study, increasing our Type II error rate, or we might have an overpowered study that enrolls and experiments on more people than is necessary, which is unethical and a waste of resources. We need a principled way to make this decision.
+
+# Maximin, efficiency and relative efficiency
+
+Using the Breukelen and Candel terminology, let's define our parameter space as ICC values between 0 and .25 as in our plot above, and our design space as the three pairs of $k$ and $n$ given above. We want to use a maximin approach to find the 'least bad' design in the worst-case scenario over all unknown ICCs.
+
+One possible criteria would be efficiency - which option has the best 'worst case' estimator variance over the parameter space? Looking at the plot in the last section, it's easy to see that the option with the lowest worst-case variance is option C: At the maximum value of $\rho = .25$, where all three design options have the their 'worst case', it has the lowest variance. In fact, using the efficiency criteria, the maximin approach will always select the option with the best performance under the highest value of ICC in your parameter space, since variance is an increasing function. The downside is that the performance of option C is much worse under the (quite plausible in my experience) ICCs between 0 and .1.
+
+An attractive alternative presented by Breukelen and Candel is to use *relative efficiency* - the ratio of the estimator variance under best possible design to the variance under your design over each value of ICC. Let's show this in R, then discuss the consequences; I think that helps with the explanation.
+
+```{r}
+re_dat <- dat %>% select(-n, -k) %>% spread(option, var_b) %>%
+  mutate(min = pmin(A, B, C)) %>%
+  mutate(a = min / A) %>% 
+  mutate(b = min / B) %>% 
+  mutate(c = min / C) %>% 
+  gather(key = option, value = RE, 6:8)
+ggplot(data = re_dat) + geom_line(aes(x = iccs, y = RE, group = option, color = option))
+```
+
+Now we're getting somewhere. We know we have a limited set of options from our budget, so the choice here is about which is optimal compared to our best choice, and *how we might want to compensate for that*. You can see here that option C, which had the *best* worst-case performance under the efficiency criteria, actually has the *worst* worst-case performance under the relative efficiency criteria. That means that choosing option C was a really bad decision, relative to the alternatives, in those cases where the ICC was low.
+
+The (best) maximin choice under relative efficiency is option B: at worst, it is 62.5% as good as the best possible choice. By contrast, options A and C have worst-case relative efficiencies well under 50%.
+
+The reason relative efficiency can be helpful is that if you work out the algebra between budgeting and power, it can tell us how much 'extra budget' we might need under the worst-case scenario to get the results of the best-case scenario. Let's say we picked option B. It will give us best-case performance over a wide range of ICC values, but if we want to guarantee best-case performance among ALL ICC values, we need to increase our budget by a factor of 1 / .625 = 1.6. (Easy to ask from our funders, right? Under option C, we would have to increase our budget by a factor of  1 / .1125 = 8.9 to guarantee best-case-choice performance... not an ask you want to make.
+
+
+# Things glossed over, extensions from other work
+
+Breukelen and Candel go into more mathematical detail and look at the behavior of maximin under the relative efficiency creiterion among various cluster / person cost ratios to generalize some of the findings above to a wide range of situations.
+
+Wu, Wong, and Crespi (2017) extends this work to situations where the ICCs and cost structures can vary across treatment arms, considering only binary outcomes, and Breukelen and Candel 2018 does the same for continuous outcomes. The work in these papers allows for different numbers of clusters and different cluster size by treatment arm, but not for variability in cluster sizes within treatment arms.
+
+
+```{r}
+sessionInfo()
+```
+
