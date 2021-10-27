@@ -1,0 +1,456 @@
+---
+title: "Nerding out with newborn names"
+author: "Josh Nugent"
+date: "December 2020"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 1
+---
+
+```{r setup, include=FALSE, message=F, echo=F, warning=F}
+knitr::opts_chunk$set(echo = FALSE, warning = F, message = F,
+                      fig.height = 5, fig.width = 10)
+library(tidyverse)
+library(directlabels)
+library(usmap)
+```
+
+```{r cache=T}
+load("core_data.RData")
+```
+
+# Introduction
+
+Recent news of a potential new arrival to my extended family caused me to think about choosing names for newborns. What names are popular? Are there patterns and trends over space and time? And given a set of criteria, how might one use data to choose a newborn name?
+
+
+# Shiny app
+
+I am developing a [Shiny app](https://joshuanugent.shinyapps.io/babynames/) (currently somewhere between non-existent and very work-in-progess) that allows you to explore the newborn names data with an eye to some of the questions I present below. Baby-name Shiny apps are quite common, but none were getting too deep into the analysis, so I thought I'd try to make something a little more complex.
+
+
+# Definitions & Data
+
+The [Social Security Administration](https://www.ssa.gov/oact/babynames/state/) keeps records of all newborn names in the US from 1910 to 2019. The data is reported at the state and national level, but only for names with 5 or more occurrences in a given state. Different spellings of similar names (Caitlin, Caitlyn, Kaitlyn, etc) are all counted separately.
+
+The dataset also contains a binary variable for sex assigned at birth. I'll be using the terminology AFAB (assigned female at birth) and AMAB (assigned male at birth), and in this document I'll generally present the version of a name with more AFAB or AMAB occurrences.
+
+Name frequencies presented here are standardized: Each name is shown as a proportion of the total births in a given location in a given year for a given assigned sex at birth.
+
+
+
+
+# Basic name dynamics
+
+Most names follow a smooth boom-bust cycle (ex: Susan, below). However, there are exceptions to that pattern (ex: Anthony), especially as you go further back in time. Black line is data pooled across the US.
+
+```{r}
+thisplot <- dat %>% filter(name == "Robert" & sex == "M" |
+                        name == "Anthony" & sex == "M" |
+                        name == "Olivia" & sex == "F" |
+                        name == "Joshua" & sex == "M" |
+                        name == "Gertrude" & sex == "F" |
+                        name == "Susan" & sex == "F",
+                     #year > 1929,
+                     state %in% state_subset)
+ggplot(thisplot) +
+  geom_line(data = thisplot %>% filter(state != "US"),
+    mapping = aes(x = year, y = prop, color = state)) +
+  geom_line(data = thisplot %>% filter(state == "US"),
+    mapping = aes(x = year, y = prop),
+    color = "black") +
+  labs(y = "proportion of births with this name") +
+  theme_minimal() +
+  facet_wrap(~name, scales = "free_y")
+```
+
+You probably want to see the data for your name. Go to the [Shiny app](https://joshuanugent.shinyapps.io/babynames/)!
+
+
+
+# Conformity for AFAB/AMAB names
+
+No matter how you measure it, there is more variability in AFAB names. 
+
+ - The top 100 AMAB names account for 724,000 births in 2019
+ - The top 100 AFAB names account for 549,000 births in 2019
+ - Number of AMAB names with only 5 occurrences in 2019: 4,252
+ - Number of AFAB names with only 5 occurrences in 2019: 5,280
+
+Note in the plot below that there is a lack of overlap at the top and bottom of the scale.
+
+```{r}
+ggplot(data = babynames2) +
+  geom_histogram(data = babynames2 %>% filter(sex == "M"),
+                 mapping = aes(x = n), fill = "gray10", color = "black", alpha = .5) +
+  geom_histogram(data = babynames2 %>% filter(sex == "F"),
+                 mapping = aes(x = n), fill = "yellow", color = "black", alpha = .5) +
+  scale_y_continuous(trans='log') +
+#  xlim(c(5, 100000)) +
+  theme_minimal() +
+  theme(axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()) +
+  labs(y = "Number of names (log scale)", x = "Number of babies with a given name (log scale)",
+       #title = "More variability in girls' names, more herding in boys' names",
+       subtitle = "Yellow = AFAB, Gray = AMAB") +
+  scale_x_continuous(trans='log')
+```
+
+Let's look at this pattern at the state level, over time.
+
+```{r}
+td <- top50pct %>% filter(state %in% c("NY", "VT", "TX", "CA",
+                                               "UT", "SD", "US"))
+ggplot()+#data = td) +
+  geom_line(data = td %>% filter(state != "US"),
+            mapping = aes(x = year, y = n_names, color = state)) +
+  theme_minimal() +
+  labs(title = "Number of names that make up the top 50% of births",
+       y = "number of names") +
+  facet_wrap(~sex)
+```
+
+Take-home messages:
+
+ - More name variability in some states than others
+ - All states gaining name diversity over time
+ - Diversity of AFAB names outpacing diversity of AMAB names
+
+I would guess (but have not grabbed the data yet) that this is mostly, but not completely, explained by the racial/ethnic/cultural diversity characteristics of each state. Also interesting (to me, at least) is that a small number ot states (like Vermont) appear to not obey the overall trend of AFAB names having more variability. Worth looking into more at some point.
+
+
+
+
+# Picking a newborn name: Four strategies
+
+
+## Strategy 1: Current common names
+
+Go with the flow. Pick a popular name that's really zeitgeisty.
+
+Possible options from among the most popular 2019 names, nationally:
+
+```{r include = F, echo = F, eval = F}
+babynames2 %>% filter(year == 2019) %>% arrange(desc(n))
+```
+
+ - Liam (20,502)
+ - Noah (19,048)
+ - Olivia (18,451)
+ - Emma (17,102)
+ - Ava (14,440)
+ - Oliver (13,891)
+
+**Problems with this strategy:** These names may be common, yet may also be pask their peak and in decline. Or, they may be popular in some states, but not yours!
+
+Let's take a look. Black line is again the national average.
+
+```{r}
+thisplot2 <- dat %>% filter(name == "Liam" & sex == "M" |
+                        name == "Noah" & sex == "M" |
+                        name == "Olivia" & sex == "F" |
+                        name == "Oliver" & sex == "M" |
+                        name == "Ava" & sex == "F" |
+                        name == "Emma" & sex == "F",
+                     year > 1950,
+                     state %in% state_subset)
+
+ggplot(thisplot2) +
+  geom_line(data = thisplot2 %>% filter(state != "US"),
+    mapping = aes(x = year, y = prop, color = state)) +
+  geom_line(data = thisplot2 %>% filter(state == "US"),
+    mapping = aes(x = year, y = prop),
+    color = "black", alpha = .95) +
+  theme_minimal() +
+  labs(y = "proportion of births with this name")+#,
+       #title = "Popular, but past their peak?") +
+  facet_wrap(~name)
+```
+
+if you live in Vermont, Ava is way past its peak, but in Indiana it's just starting to pop!
+
+
+## Strategy 2: Currently peaking names nationwide
+
+Get it while it's hot. Pick a name that appears to be peaking across the country, even if it's rare.
+
+In our case, we'll use the following definition of a 'peaking' name:
+
+ - Increased in popularity from 2015 to 2018
+ - Decreased in popularity from 2018 to 2019
+
+**Problems with this strategy:** Sensitive to definition of peak; the upturns and downturns might be statistical noise. Further, does not take into account state-level variation.
+
+Let's see what emerges from this method:
+
+```{r}
+ggplot(peaking_names_df) +
+  geom_line(aes(x = year, y = prop, color = name)) +
+  geom_dl(aes(x = year, y = prop, color = name, label = name),
+          method = list(dl.combine("last.points"), cex = .81),
+          size = 1) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  xlim(c(1990, 2021)) +
+  labs(y = "proportion of births with this name")
+```
+
+Nice to see that Dawson is back to its 90s-level popularity. Looks like Easton is dropping fast, get it while you can!
+
+
+## Strategy 3: Currently uncommon names
+
+The future is unpredictable. Rare names allow a child a fresh start. Find the rarest names to avoid being part of the herd.
+
+Rare names are generally rare in both states and nationwide, so you don't need to worry too much about state-level differences. Also, because of the long tail of rare names, you have a LOT to choose from!
+
+Possible options from among the least common 2019 names:
+
+ - Anakin (177)
+ - Fenix (29)
+ - Quest (26)
+ - Khole (11)
+ - Iam (5)
+
+**Problems with this strategy:** None.
+
+
+
+## Strategy 4: Predicted future popularity
+
+Set them up to be a pan-generational influencer, always ahead of the curve.
+
+ - Look at states that are most often on the leading edge of popular names
+ - Find the names in those states that are just starting their explosive growth
+
+**Problems with this strategy: May be sensitive to different definitions of leading edge states and explosive growth.**
+
+Example: We want to find the state that was first to peak with "Joshua," and identify it just as it's starting the explosive growth around 1970 - 1975.
+
+```{r fig.height=3, fig.width=5, fig.align='center'}
+td1 <- dat %>% filter(name %in% c("Joshua"),
+                     year > 1920,
+                     state %in% state_subset,
+                     sex == "M")
+ggplot() +
+  geom_line(data = td1 %>% filter(state != "US"),
+            aes(x = year, y = prop, color = state)) +
+  geom_line(data = td1 %>% filter(state == "US"),
+            aes(x = year, y = prop), color = "black") +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  labs(y = "proportion of births with this name") +
+  facet_wrap(~name)
+```
+
+#### Strategy 4 step 1: Identify leading / lagging indicator states
+
+First, we find the peak year for each name in each state (among names that appear in all 51 locations in at least 10 years, and which peaked after 1970, to remove old names whose peak was before the start of the data collection). Then:
+
+ - Find states whose peak year was earliest for each name, give that state a "point"
+ - If states peak in the same year, can allow or discard ties
+ - Count up which state has the most "points"
+ - Repeat for states whose peak year was the latest for each name.
+
+Example: Tyler peaked in 1990 in South Dakota, and no other state peaked on or before that date. For Wyatt, two states peaked earliest. Zoe peaked in Ohio first in 2001, and nowhere else. In this case, if we allow ties, each state listed gets a point. If we discard ties, only South Dakota and Ohio get points for these four names.
+
+```{r}
+data.frame(early_peak_states %>%
+  filter(name %in% c("Zoe", "Wyatt", "Tyler")) %>% ungroup() %>% 
+  select(-sex))
+```
+
+Leading states:
+
+```{r}
+plot_usmap(data = early_peak_states %>%
+             group_by(state) %>% 
+             summarise(leads = n()),
+           color = "gray", size = .1,
+           values = "leads") + 
+  scale_fill_continuous(na.value="white",
+                        low = "red", high = "green",
+                        name = "# names that\npeaked here first") +
+  theme(legend.position = "right")# +
+ # labs(title = "Where do names peak first?")
+```
+
+Lagging states:
+
+```{r}
+plot_usmap(data = late_peak_states %>%
+             group_by(state) %>% 
+             summarise(leads = n()),
+           color = "gray", size = .1,
+           values = "leads") + 
+  scale_fill_continuous(na.value="white",
+                        low = "red", high = "green",
+                        name = "# names that\npeaked here last") +
+  theme(legend.position = "right") #+
+  #labs(#title = "Where do names peak last?",
+  #     subtitle = "(among names that are present in all 51 states in at least 10 years and which peaked after 1970)")
+```
+
+Notably, there are many states that fall in the middle - for example, Florida and Missouri - which are rarely ahead of the curve but also rarely behind.
+
+Utah leaps out as a clear outlier leading state. This holds up whether ties are included or not.
+
+Allowing ties: 
+
+```{r}
+sort(table(early_peak_states$state), decreasing = T)[1:20]
+```
+
+Discarding ties: 
+
+```{r}
+sort(table(early_peak_states_EX$state), decreasing = T)[1:20]
+```
+
+**Let's look at a Utah-specific example.** Utah appears to adopt and then discard names more quickly than any other state. Example:
+
+
+```{r fig.height=3, fig.width=6, fig.align='center'}
+ggplot(dat %>% filter(name %in% c("Tyler"),
+                     year > 1950,
+                     state %in% c("UT", "MA"),
+                     sex == "M")) +
+  geom_line(aes(x = year, y = prop, color = state)) +
+  theme_minimal() +
+  labs(y = "proportion of births with this name") +
+  facet_wrap(~name)
+```
+
+
+#### Strategy 4 step 2: Identify leading state names about to pop
+
+What names are on the rise in Utah right now? Searched for names in Utah that:
+
+ - Have 3 years of slow or negative growth before 2018
+ - Have one large jump from 2018 to 2019
+ 
+Results below.
+
+```{r}
+ggplot(ut_names_df %>% filter(name != "Melanie")) +
+  geom_line(aes(x = year, y = prop, color = name)) +
+  geom_dl(aes(x = year, y = prop, color = name, label = name),
+          method = list(dl.combine("last.points"), cex = .84),
+          size = 1) +
+  theme_minimal() + 
+  theme(legend.position = "none") +
+  xlim(c(1990, 2022)) +
+  ylim(c(0, .008)) +
+  labs(y = "proportion of births with this name",
+       title = "Starting to pop in Utah...")
+```
+
+
+What are these special names doing in other states?
+
+```{r}
+td4 <- dat %>% filter(name == "Theodore" & sex == "M" |
+                        name == "Emmett" & sex == "M" |
+                        name == "Elias" & sex == "M" |
+                        name == "Beckett" & sex == "M" |
+                        name == "Poppy" & sex == "M" |
+                        #name == "Melanie" & sex == "F" |
+                      name == "Isla" & sex == "F",
+                     year > 1980,
+                     state %in% c("UT", "FL", "CA", "DC", "MS", "US"))
+ggplot() +
+  geom_line(data = td4 %>% filter(state != "US"),
+            aes(x = year, y = prop, color = state)) +
+  geom_line(data = td4 %>% filter(state == "US"),
+            aes(x = year, y = prop), color = "black") +
+    theme_minimal() +
+  labs(y = "proportion of births with this name"#,
+       #title = "What are these names doing in other states?"
+       ) +
+  facet_wrap(~name)
+```
+
+How does the prevalence of those names compare to the heavy hitters?
+
+```{r}
+ggplot(babynames2 %>% filter(name == "Theodore" & sex == "M" |
+                             name == "Emmett" & sex == "M"   |
+                             name == "Elias" & sex == "M"    |
+                             name == "Beckett" & sex == "M"  |
+                             name == "Poppy" & sex == "M"    |
+                             #name == "Melanie" & sex == "F"  |
+                             name == "Isla" & sex == "F"     |
+                             name == "Liam" & sex == "M"     |
+                             name == "Olivia" & sex == "F",
+                             year > 1980) %>% 
+         mutate(name = factor(name, levels = c("Theodore",
+                                               "Emmett",
+                                               "Elias",
+                                               "Beckett",
+                                               "Poppy",
+                                               "Melanie",
+                                               "Isla",
+                                               "Liam",
+                                               "Olivia"
+                                               )))) +
+    geom_dl(aes(x = year, y = prop, color = name, label = name),
+          method = list(dl.combine("last.points"), cex = .84),
+          size = 1) +
+  theme_minimal() +
+  geom_line(aes(x = year, y = prop, color = name)) +
+  theme(legend.position = "none") +
+  xlim(c(1980, 2022)) +
+  labs(y = "proportion of births with this name",
+       title = "Nationwide...")
+```
+
+Looks like they still have a lot of headroom to gain popularity!
+
+# What's up with Utah?
+
+My sister-in-law suggested to me that the age distribution of mothers might have made Utah an outlier - perhaps there are lots of Mormons who, for cultural reasons, are more likely to be young when having children and hence more likely to have cutting-edge names. I thought that was a really compelling idea, so I looked into it using [CDC natality data for 2019](https://wonder.cdc.gov/controller/datarequest/D66). The plot below also only looks at names that peaked in all 51 states since 1980, but includes a wider variety of uncommon names - they had to appear 6 or more times in each state in at least 2 years.
+
+```{r}
+scat <- readRDS("age_data_1980_on.rds")
+ggplot(data = scat %>%
+         filter(state != "US") %>% 
+         mutate(type = factor(type,
+                              levels = c("first_peaks_with_ties",
+                                         "last_peaks_with_ties"),
+                              labels = c("Peaking first", "Peaking last")))) +
+  geom_point(aes(x = avg_age_mom, y = count, color = state)) +
+  geom_text(aes(x = avg_age_mom, y = count, label = state, color = state),
+            nudge_x = .07,
+            nudge_y = 1.5,
+            size = 2.8) +
+  #theme_minimal() +
+  theme(legend.position = "none") +
+  labs(x = "Average age of mother",
+       y = "Number of names of first/last peak") + #,
+       #title = "Names that have peaked since 1980") +
+  facet_wrap(~type)
+```
+
+Even accounting for this redefinition of the data, Utah is still a huge outlier, and in general, most states aren't affected much by the redefinition. I expect all of these nuances are due to racial/ethnic/culture/class differences in different states; however, I don't have easily accessible data on each birth to do a more sophisticated analysis.
+
+Here are the names from the data above where Utah was the first to peak (including ties):
+
+```{r}
+utah_did_these_names_first <- readRDS("utah_leader_names_1980_on.rds")
+utah_did_these_names_first
+```
+
+# Take-home message
+
+I'm tempted to say that none of this really matters, but I suspect that either:
+
+ - Class signaling by name really does impact a child's life course, or
+ - People *think* that class signaling by name really does impact a child's life course
+
+... meaning that this probably does matter to you, especially if you've read this far.
+
+<div class="tocify-extend-page" data-unique="tocify-extend-page" style="height: 0;"></div>
