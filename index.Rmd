@@ -1,0 +1,80 @@
+---
+title: "Josh Nugent"
+output: html_document
+---
+
+
+### Bio & research interests
+
+I am a PhD student in Biostatistics at the University of Massachusetts in Amherst, researching methods for cluster randomized trials and causal inference with [Laura Balzer](https://www.balzerlab.com/) and [Ken Kleinman](https://www.kleinman.science/).
+
+Before entering the PhD program, I was a high school math teacher for 8 years, among other things. Here is [my CV](https://joshua-nugent.github.io/cv/Nugent_CV.pdf).
+
+
+### Current active projects
+ 
+ + Nonparametric causal inference methods for cluster randomized trials
+ 
+ + Applied work with the [SEARCH Collaboration](https://www.searchendaids.com/) evaluating impacts of various interventions to reduce disease burden in Kenya and Uganda.
+ 
+ 
+### Publications (primary author)
+
+ + Nugent, J, Balzer, L. Evaluating shifts in mobility and COVID-19 case rates in U.S. counties: A demonstration of modified treatment policies for causal inference with continuous exposures. (submitted for publication, pre-print [here](http://arxiv.org/abs/2110.12529).)
+
+ + Nugent, J, Kleinman, K. Type I error control for cluster randomized trials under varying small sample structures. BMC Med Res Methodol 21, 65 (2021). https://doi.org/10.1186/s12874-021-01236-7
+
+### Publications (contributing author)
+
+ + Koss CA, Havlir DV, Ayieko J, Kwarisiima D, Kabami J, Chamie G, Atukunda M, Mwinike Y, Mwangwa F, Owaraganise A, Peng J, OliloW, Snyman K, Awuonda B, Clark TD, Black D, Nugent J, Brown LB, Marquez C, Okochi H, Zhang K, Camlin CS, Jain V, Gandhi M, Cohen CR, Bukusi EA, Charlebois ED, Petersen ML, Kamya MR, Balzer LB. HIV incidence after pre-exposure prophylaxis initiation among women and men at elevated HIV risk: A population-based study in rural Kenya and Uganda. PLOS Med. 2021 Feb 9;18(2):e1003492. https://doi.org/10.1371/journal.pmed.1003492
+
+ 
+ + Kakande E, Christian C, Balzer LB, Owaraganise A, Nugent J, DiIeso W, Rast D, Kabami J, Johnson J, Camlin CS, Shade SB, Geng E, Kwarisiima D, Kamya MR, Havlir DV, Chamie G. Cluster RCT of a mid-level manager intervention to promote IPT uptake in Uganda. [Link forthcoming](https://joshua-nugent.github.io/).
+
+
+ + Koss CA, Nugent J, Balzer L. Social networks predict PrEP uptake in SEARCH study in rural Kenya and Uganda. [Link forthcoming](https://joshua-nugent.github.io/).
+ 
+ 
+```{r include = F, echo = F}
+#<img align="left" src="bw.jpg" width = "200">
+
+### Consulting clients
+# UMass CNS and math dept
+# FRCOG
+# EnCompass
+# APEA
+```
+
+### Consulting clients / projects
+
+ + EnCompass, LLC: External review of a study to determine prevalence of and risk factors for forced labor among migrant workers in southeast Asia.
+
+ + Franklin County Council of Governments Health Equity Working Group: Impacts of COVID-19 pandemic in Massachusetts.
+ 
+ + University of Massachusetts College of Natural Sciences: Development of survey instrument and analysis of results.
+ 
+
+### Older projects, explainers, experiments with data, visualizations, etc...
+
+ + Inspired by a new extended family member arriving soon, an analysis of state-level patterns in newborn names and future name popularity prediction. [Summary of some findings](http://joshua-nugent.github.io/newborn_names) and [Shiny app in development](https://joshuanugent.shinyapps.io/babynames/) to explore the data.
+
+ + [Vignette](https://joshua-nugent.github.io/allFit/) on adjusting settings, trying different optimizers, and/or using the allFit() function to help achieve convergence in lmer/glmer mixed models.
+
+ + [Vignette](https://joshua-nugent.github.io/maximin/) walking through [Breukelen and Candel's 2015 paper](https://doi.org/10.1177/0962280211421344) on maximin approaches to planning a cluster randomized trial and calculating sample size in the face of uncertainty.
+
+ + [Introductory vignette](https://joshua-nugent.github.io/splines/) on how splines work in regression.
+
+ + [Forecasting flu incidence in Germany](https://joshua-nugent.github.io/eb/eb.pdf) - Seminar presentation with colleagues implementing from scratch a forecasting algorithm developed by [Brooks et al.](https://doi.org/10.1371/journal.pcbi.1004382)
+ 
+ + [COVID-19 case dashboard](https://joshuanugent.shinyapps.io/seventyfive/) developed for the Amherst-Pelham Education Association.
+
+ + Unpublished paper: [Investigating bias in penalized quasi-likelihood (PQL) estimation for generalized linear mixed models with dichotomous outcomes](https://joshua-nugent.github.io/pql/main.pdf).
+
+<br>
+
+<center>
+[![Tw](t_blue.png){width=3%}](https://twitter.com/joshuanugent?ref_src=twsrc%5Etfw)
+</center>
+
+<br>
+
