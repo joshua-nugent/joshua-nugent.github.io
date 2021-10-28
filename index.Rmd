@@ -4,11 +4,12 @@ output: html_document
 ---
 
 
+<img style="float: right;width: 340px;padding:20px;" src="biopic.jpg">
+
 ### Bio & research interests
 
-I am a PhD student in Biostatistics at the University of Massachusetts in Amherst, researching methods for cluster randomized trials and causal inference with [Laura Balzer](https://www.balzerlab.com/) and [Ken Kleinman](https://www.kleinman.science/).
 
-Before entering the PhD program, I was a high school math teacher for 8 years, among other things. Here is [my CV](https://joshua-nugent.github.io/cv/Nugent_CV.pdf).
+I am a PhD student in Biostatistics at the University of Massachusetts in Amherst, researching methods for cluster randomized trials and causal inference with [Laura Balzer](https://www.balzerlab.com/) and [Ken Kleinman](https://www.kleinman.science/). Before entering the PhD program, I was a high school math teacher for 8 years, among other things. Here is [my CV](https://joshua-nugent.github.io/cv/Nugent_CV.pdf).
 
 
 ### Current active projects
