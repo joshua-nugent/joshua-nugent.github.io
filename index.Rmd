@@ -4,20 +4,20 @@ output: html_document
 ---
 <img style="float: right;width: 340px;padding:20px;" src="biopic.jpg">
 
-### Bio
+## Bio
 
 I am a PhD student in Biostatistics at the University of Massachusetts Amherst (*anticipated completion date: summer 2022). I research causal inference, machine learning, and cluster-randomized trials (CRTs) with [Laura Balzer](https://www.balzerlab.com/) and [Ken Kleinman](https://www.kleinman.science/). Before entering the PhD program, I was a high school math teacher for 8 years, among other things. Here is [my full CV](https://joshua-nugent.github.io/cv/Nugent_CV.pdf).
 
 
-### Research interests & expertise:
+## Research interests & expertise:
 
- + Causal inference with applications to public health, medicine, public policy
+ + Causal inference with applications to public health, medicine, and public policy
  
- + Nonparametric statistics
+ + Semiparametric statistics with discrete or continuous exposures
  
- + Integrating machine learning and statistical inference
+ + Integrating (ensemble) machine learning and statistical inference via targeted learning
  
- + Design and analysis of CRTs
+ + Design and analysis of CRTs, particularly with small samples
  
  + Statistical analyses with complex missingness and dependence
  
@@ -29,7 +29,7 @@ I am a PhD student in Biostatistics at the University of Massachusetts Amherst (
 
 
  
-### Active projects
+## Active projects
 
 Related to my dissertation, I work frequently with the [SEARCH Collaboration](https://www.searchendaids.com/), evaluating impacts of various interventions to reduce infectious disease burden in Kenya and Uganda. Recent projects include:
 
@@ -42,9 +42,11 @@ Related to my dissertation, I work frequently with the [SEARCH Collaboration](ht
  + Analysis of effectiveness of intervention to reduce HIV incidence via universal HIV test-and-treat with PrEP
  
  
-### Publications
+## Publications
 
- + **Nugent, J**, Balzer, L. Evaluating shifts in mobility and COVID-19 case rates in U.S. counties: A demonstration of modified treatment policies for causal inference with continuous exposures. *(Under review at the American Journal of Epidemiology, pre-print [here](http://arxiv.org/abs/2110.12529))*
+Peer-reviewed:
+
+ + **Nugent, J**, Balzer, L. Evaluating shifts in mobility and COVID-19 case rates in U.S. counties: A demonstration of modified treatment policies for causal inference with continuous exposures. *(Under revision at the American Journal of Epidemiology, pre-print [here](http://arxiv.org/abs/2110.12529))*
 
  + Kakande E, Christian C, Balzer LB, Owaraganise A, **Nugent J**, DiIeso W, Rast D, Kabami J, Johnson J, Camlin CS, Shade SB, Geng E, Kwarisiima D, Kamya MR, Havlir DV, Chamie G. Cluster RCT of a mid-level manager intervention to promote IPT uptake in Uganda. *(Under review at the Lancet HIV)*
 
@@ -52,18 +54,35 @@ Related to my dissertation, I work frequently with the [SEARCH Collaboration](ht
 
  + Koss CA, Havlir DV, Ayieko J, Kwarisiima D, Kabami J, Chamie G, Atukunda M, Mwinike Y, Mwangwa F, Owaraganise A, Peng J, OliloW, Snyman K, Awuonda B, Clark TD, Black D, **Nugent J**, Brown LB, Marquez C, Okochi H, Zhang K, Camlin CS, Jain V, Gandhi M, Cohen CR, Bukusi EA, Charlebois ED, Petersen ML, Kamya MR, Balzer LB. HIV incidence after pre-exposure prophylaxis initiation among women and men at elevated HIV risk: A population-based study in rural Kenya and Uganda. PLOS Med. 2021 Feb 9;18(2):e1003492. https://doi.org/10.1371/journal.pmed.1003492
 
+In progress: Methods
+
+ + **Nugent, J**, Balzer, L. Two-stage TMLE for cluster randomized trials with few independent units and missingness. *(Dissertation chapter)*
+
+ + **Nugent, J**, Balzer, L. Semiparametric methods for randomized trials with clustering in a single arm. *(Dissertation chapter)*
+
+In progress: Applications
+
+ + Impact of a community-wide HIV test and treat intervention on population level TB transmission in rural Uganda. *(Author list and manuscript being finalized)*
+
+ + Social networks predict PrEP uptake in SEARCH study in rural Kenya and Uganda. *(Author list and manuscript being finalized)*
+
+Pre-registered statistical analyis plans
+
+ + **Nugent J**, Balzer L. Statistical Analysis Plan for Tuberculosis Outcomes in SEARCH TB Study. (2022). *Link forthcoming.*
+
+ + Balzer L, **Nugent J**, Havlir D, Chamie G. Statistical Analysis Plan for Health Outcomes in Phase 1 of the SEARCH-IPT Study. (2021). https://arxiv.org/abs/2111.10467
 
  
-### Consulting clients / projects
+## Consulting clients / projects
 
  + EnCompass, LLC: External review of a study to determine prevalence of and risk factors for forced labor among migrant workers in southeast Asia.
 
- + Franklin County Council of Governments Health Equity Working Group: Impacts of COVID-19 pandemic in Massachusetts.
+ + Franklin County Council of Governments Health Equity Working Group: Statistical analysis of impacts of COVID-19 pandemic in western Massachusetts.
  
- + University of Massachusetts Amherst College of Natural Sciences: Development of survey instrument and analysis of results.
+ + University of Massachusetts Amherst College of Natural Sciences: Development of survey instruments, analysis / interpretation / communication of results.
  
 
-### Informal projects, explainers, experiments, visualizations, etc...
+## Informal projects, explainers, experiments, visualizations, etc...
 
  + Inspired by the recent arrival of a nephew, an analysis of state-level patterns in newborn names and future name popularity prediction. [Summary of some findings](http://joshua-nugent.github.io/newborn_names) and [Shiny app in development](https://joshuanugent.shinyapps.io/babynames/) to explore the data.
 
