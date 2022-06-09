@@ -46,9 +46,9 @@ Related to my dissertation, I work frequently with the [SEARCH Collaboration](ht
 
 Peer-reviewed:
 
- + **Nugent, J**, Balzer, L. Evaluating shifts in mobility and COVID-19 case rates in U.S. counties: A demonstration of modified treatment policies for causal inference with continuous exposures. *(Under revision at the American Journal of Epidemiology, pre-print [here](http://arxiv.org/abs/2110.12529))*
+ + **Nugent, J**, Balzer, L. Evaluating shifts in mobility and COVID-19 case rates in U.S. counties: A demonstration of modified treatment policies for causal inference with continuous exposures. *(Accepted for publication at the American Journal of Epidemiology, in press. Pre-print [here](http://arxiv.org/abs/2110.12529))*
 
- + Kakande E, Christian C, Balzer LB, Owaraganise A, **Nugent J**, DiIeso W, Rast D, Kabami J, Johnson J, Camlin CS, Shade SB, Geng E, Kwarisiima D, Kamya MR, Havlir DV, Chamie G. Cluster RCT of a mid-level manager intervention to promote IPT uptake in Uganda. *(Under review at the Lancet HIV)*
+ + Kakande E, Christian C, Balzer LB, Owaraganise A, **Nugent J**, DiIeso W, Rast D, Kabami J, Johnson J, Camlin CS, Shade SB, Geng E, Kwarisiima D, Kamya MR, Havlir DV, Chamie G. Cluster RCT of a mid-level manager intervention to promote IPT uptake in Uganda. *(Forthcoming in The Lancet HIV)*
 
  + **Nugent, J**, Kleinman, K. Type I error control for cluster randomized trials under varying small sample structures. BMC Med Res Methodol 21, 65 (2021). https://doi.org/10.1186/s12874-021-01236-7
 
