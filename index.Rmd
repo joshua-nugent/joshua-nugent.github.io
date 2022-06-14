@@ -1,12 +1,11 @@
 ---
-title: "Josh Nugent, PhD*"
+title: "Josh Nugent, PhD"
 output: html_document
 ---
 <img style="float: right;width: 340px;padding:20px;" src="biopic.jpg">
 
-## Bio
 
-I am a PhD student in Biostatistics at the University of Massachusetts Amherst (*anticipated completion date: summer 2022). I research causal inference, machine learning, and cluster-randomized trials (CRTs) with [Laura Balzer](https://www.balzerlab.com/) and [Ken Kleinman](https://www.kleinman.science/). Before entering the PhD program, I was a high school math teacher for 8 years, among other things. Here is [my full CV](https://joshua-nugent.github.io/cv/Nugent_CV.pdf).
+Biostatistician researching causal inference, machine learning, and cluster-randomized trials (CRTs). Before earning my doctorate (advised by [Laura Balzer](https://www.balzerlab.com/)), I was a high school math teacher for 8 years, among other things. I work frequently with the [SEARCH Collaboration](https://www.searchendaids.com/), evaluating impacts of various interventions to reduce infectious disease burden in Kenya and Uganda. Here is [my full CV](https://joshua-nugent.github.io/cv/Nugent_CV.pdf).
 
 
 ## Research interests & expertise:
@@ -29,19 +28,6 @@ I am a PhD student in Biostatistics at the University of Massachusetts Amherst (
 
 
  
-## Active projects
-
-Related to my dissertation, I work frequently with the [SEARCH Collaboration](https://www.searchendaids.com/), evaluating impacts of various interventions to reduce infectious disease burden in Kenya and Uganda. Recent projects include:
-
- + Analysis of CRT to reduce rates of tuberculosis
-
- + Analysis of CRT to increase isoniazid preventive therapy (IPT) uptake among people living with HIV
- 
- + Analysis of social network predictors of pre-exposure prophylaxis (PrEP) uptake
- 
- + Analysis of effectiveness of intervention to reduce HIV incidence via universal HIV test-and-treat with PrEP
- 
- 
 ## Publications
 
 Peer-reviewed:
@@ -56,7 +42,8 @@ Peer-reviewed:
 
 In progress: Methods
 
- + **Nugent, J**, Balzer, L. Two-stage TMLE for cluster randomized trials with few independent units and missingness. *(Dissertation chapter)*
+ + **Nugent, J**, Balzer, L. Blurring cluster randomized trials and observational studies:
+Evaluating the SEARCH intervention on incident TB in rural Uganda. *(Dissertation chapter)*
 
  + **Nugent, J**, Balzer, L. Semiparametric methods for randomized trials with clustering in a single arm. *(Dissertation chapter)*
 
@@ -75,6 +62,8 @@ Pre-registered statistical analyis plans
  
 ## Consulting clients / projects
 
+ + SEARCH Collaboration: Evaluation of a community-wide intervention on population level TB transmission in rural Uganda.
+
  + EnCompass, LLC: External review of a study to determine prevalence of and risk factors for forced labor among migrant workers in southeast Asia.
 
  + Franklin County Council of Governments Health Equity Working Group: Statistical analysis of impacts of COVID-19 pandemic in western Massachusetts.
@@ -90,7 +79,7 @@ Pre-registered statistical analyis plans
 
  + [Vignette](https://joshua-nugent.github.io/maximin/) walking through [Breukelen and Candel's 2015 paper](https://doi.org/10.1177/0962280211421344) on maximin approaches to planning a cluster randomized trial and calculating sample size in the face of uncertainty.
 
- + [Introductory vignette](https://joshua-nugent.github.io/splines/) on how splines work in regression.
+ + Extremely beginner-friendly [vignette](https://joshua-nugent.github.io/splines/) on how splines work in regression.
 
  + [Forecasting flu incidence in Germany](https://joshua-nugent.github.io/eb/eb.pdf) - Seminar presentation with colleagues implementing from scratch a forecasting algorithm developed by [Brooks et al.](https://doi.org/10.1371/journal.pcbi.1004382)
  
