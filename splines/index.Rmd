@@ -1,9 +1,10 @@
 ---
-title: "Spline Notes for STAT 625 Project, Fall 2019"
-author: "Josh Nugent"
+title: "A Very Gentle Introduction to Splines"
+author: "Josh Nugent, Fall 2019"
 output:
   html_document:
     number_sections: TRUE
+    code_folding: hide
 bibliography: SPLINES.bib
 nocite: '@*'
 ---
@@ -16,11 +17,14 @@ Heavily indebted to various internet sources; see References at the end for the 
 library(splines)
 library(tidyverse)
 library(pander)
-knitr::opts_chunk$set(fig.height=3, fig.width=6, fig.align='center', warning = F, message = F)
+```
+
+```{r warning = F, message = F, echo = F}
+knitr::opts_chunk$set(fig.height=3, fig.width=6, fig.align='center', warning = F, message = F, cache = T)
 set.seed(1)
 ```
 
-# Linear Splines - The Simplest Truncated Power Series
+# Linear Splines
 
 ## Mathematical model
 
@@ -28,7 +32,6 @@ Instead of a single regression line, we fit a set of piecewise linear regression
 
 $$
 \begin{equation}
-\tag{1}
 E[y_i] = \beta_0 + \beta_1x_i+\sum_{k=1}^K b_k(x_i-\xi_k)_+ 
 \end{equation}
 $$
@@ -37,7 +40,6 @@ where
 
 $$
 \begin{equation}
-\tag{2}
 (x_i-\xi_k)_+ = 
 \begin{cases} 
     0 & x_i < \xi_k \\
@@ -100,7 +102,7 @@ They match what we expect.
 
 Over and underfitting are common problems when using splines. For linear splines, there are two things to consider: Knot number/placement and smoothing/penalization.
 
-### Idea #1: How many knots? Where to put?
+### How many knots? Where to put?
 
 The number of knots and their placement will certainly affect over/underfitting. Let's extend the approach shown above, using more knots:
 
@@ -120,9 +122,9 @@ ggplot() +
   labs(title = "Piecewise linear spline - Good number vs. too many knots...")
 ```
 
-If there is a scientific rationale for placing knots in a certain place (for example, known changes in hormone levels at the onset of puberty), you may want to select that ahead of time. However, in general, a reasonably dense grid of knots is created (often with an equal number of points in each slice) and other methods of controlling overfitting are employed.
+If there is a scientific rationale for placing knots in a certain place (for example, known changes in hormone levels at the onset of puberty), you may want to select that ahead of time. However, in general, a reasonably dense grid of knots is created (often with an equal number of points in each slice) and other methods of controlling overfitting are employed... like:
 
-### Idea #2: Penalization: Restrict the $b_i$ coefficient magnitudes
+### Penalization: Restrict the $b_i$ coefficient magnitudes
 
 This is an alternative to choosing knot location. Assume a large-ish number of knots is OK, then control overfitting via penalization. We use a penalty term $\lambda$ to constrain coefficients as follows.
 
@@ -130,7 +132,6 @@ Earlier, we noted that we are following the model below:
 
 $$
 \begin{equation}
-\tag{1}
   E[y_i] = \beta_0 + \beta_1x_i+\sum_{k=1}^K b_k(x_i-\xi_k)_+
 \end{equation}
 $$
@@ -141,7 +142,6 @@ Under this constraint, it can be shown (derivation omitted) that the OLS estimat
 
 $$
 \begin{equation}
-\tag{4}
 \hat{\boldsymbol{\beta}}=(\mathbf{X}^{T} \mathbf{X}+\lambda^{2} \mathbf{D})^{-1} \mathbf{X}^{T} \mathbf{y}
 \end{equation}
 $$
@@ -216,7 +216,7 @@ ggplot() +
 
 An obvious downside of the above is that most real-world processes don't have the sharp changes in slope implied by the model fit above. In fact, linear splines are a pretty crude way to model a non-linear relationship, so we're going to move to a more advanced technique. However, the reason we went through the linear spline example in such detail is that the big ideas (building the design matrix, estimation, and penalization for over/underfitting) are almost the same, but it's easier to build the intuition with the simple linear case.
 
-# Polynomial Splines - Truncated Power Series
+# Polynomial Splines
 
 Polynomial splines address the concern of jagged splines by using piecewise polynomials (usually of degree 3) that connect at the knot points and whose derivatives also match at the knot points, making for a smooth curve through the data. The same concerns of over/underfitting are present, and are addressed in the same way as in the linear case.
 
@@ -226,7 +226,6 @@ A linear spline is of course a special case of the more general polynomial splin
 
 $$
 \begin{equation}
-\tag{5}
 E[y_i]=\beta_{0}+\beta_{1} x_i+\ldots \beta_{D} x_i^{D}+\sum_{k=1}^{K} b_{k}\left(x_i-\xi_{k}\right)_{+}^{D}
 \end{equation}
 $$
@@ -299,7 +298,7 @@ This can be remedied by re-parameterizing the spline function as the sum of a se
 
 # Inference
 
-Generally, individual spline coeffifients are not of interest. More commonly, we ask if the addition of the spline lead to better model fit than a one-coefficient linear model. Without penalization, confidence bands for the spline can be calculated pointwise in the same manner as OLS regression. Also, since splines essentially create 'multiple coefficients' for each modeled variable, we can use full/reduced $F$ tests to check for improvement in fit of the model with and without a spline. When using a penalized spline, bootstrap procedures can be used to get empirical confidence bands or distribution of full/reduced model statistics.
+Generally, individual spline coefficients are not of interest. More commonly, we ask if the addition of the spline lead to better model fit than a one-coefficient linear model. Without penalization, confidence bands for the spline can be calculated pointwise in the same manner as OLS regression. Also, since splines essentially create 'multiple coefficients' for each modeled variable, we can use full/reduced $F$ tests to check for improvement in fit of the model with and without a spline. When using a penalized spline, bootstrap procedures can be used to get empirical confidence bands or distribution of full/reduced model statistics.
 
 
 
