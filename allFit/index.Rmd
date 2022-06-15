@@ -9,23 +9,84 @@ output:
     number_sections: false  ## if you want number sections at each table header
 ---
 
-# TL;DR
+This document generated:
 
-To automatically iterate through all possible (g)lmer optimizers and find one that converges, use code similar to what's below:
-
+```{r echo = F, cache = F}
+format(Sys.time(), "%A, %B %d, %Y")
 ```
+
+$~$
+
+# Background / Setup
+
+I frequently encounter onvergence problems when fitting mixed models. The goal of this vignette is to show how to use allFit() in the `lme4` package to quickly test different optimizers in search of convergence. This document draws heavily on posts by 
+[Steven V. Miller](http://svmiller.com/blog/2018/06/mixed-effects-models-optimizer-checks/), 
+[unknown author](https://rstudio-pubs-static.s3.amazonaws.com/33653_57fc7b8e5d484c909b615d8633c01d51.html), and
+[unknown author](https://cran.r-project.org/web/packages/lme4/vignettes/lmerperf.html), many thanks!
+
+We assume a linear mixed model (LMM) approach to analyzing data from a two-arm cluster-randomized trial where the cluster-level variance is different in the two arms. The **betas** give the mean responses in each arm (we'll fix the control arm at zero), **sig_b2** is a vector of cluster-level variance in each arm, and **sigma_residual** is the within-cluster variance, assumed to the the same across each arm. To relax the assumption that sigma_residual has to be constant across both arms, you can use the `nlme` package with different weights by arm instead of `lme4`.
+
+```{r setup, message = FALSE, warning=FALSE, cache = F, eval = T}
+library(tidyverse)
+library(lme4)
+library(optimx)
+library(minqa)
+library(dfoptim)
+sim <- function(nsub = 2, nclust = 3, sigma_residual2 = 1,  sig_b2 = c(.3, 10), betas = c(0,1)){
+  narm <- 2                                     # Number of arms of the trial
+  n <- nsub * nclust * narm                     # Total number of participants
+  y <- rep_len(NA, n)
+  arm <- rep(0:(narm-1), each = nsub*nclust)
+  clustid <- rep(1:(nclust*narm), each = nsub)
+  clustRE <- rep(rnorm(narm*nclust, mean = 0, sd = rep(sqrt(sig_b2), each = nclust)), each = nsub)
+  sig_b2 <- rep(sig_b2, each = nclust*nsub)
+  error <- rnorm(n, mean = 0, sd = sqrt(sigma_residual2))
+  beta <- rep(betas, each = nclust*nsub)
+  y <- beta + clustRE + error
+  return(cbind.data.frame(arm, clustid, sig_b2, clustRE, error, beta, y))
+}
+```
+
+$~$
+
+# Basic use case: Convergence fails with default settings
+
+Simulate some data with a seed that I know will cause a convergence problem:
+
+```{r}
+set.seed(4)
+dat <- sim(nsub = 100, nclust = 100, sigma_residual2 = .2,  sig_b2 = c(.2, 1), betas = c(0,1))
+```
+
+Let's fit a model that allows for different cluster-level variances in the two arms. We specify a random intercept that is shared between both arms, then additional possible variance when arm = 1. When fitting this model with default settings, we get a convergence error.
+
+```{r cache=TRUE}
 model <- lmer(y ~ arm + (1 + arm | clustid), data = dat)
-diff_optims <- allFit(model, maxfun = 1e5, parallel = 'multicore', ncpus = detectCores())
-is.OK <- sapply(diff_optims, is, "merMod")
-diff_optims.OK <- diff_optims[is.OK]
-lapply(diff_optims.OK,function(x) x@optinfo$conv$lme4$messages)
+```
 
-convergence_results <- lapply(diff_optims.OK,function(x) x@optinfo$conv$lme4$messages)
+### Quick fix with allFit()
+
+To use allFit() to iterate through all possible (g)lmer optimizers and find one that converges, use code similar to what's below. The `maxfun` option sets the maximum number of iterations - more can increase the likelihood of convergence, though I have had R freeze up sometimes if the value is too high. In this case, 1e5 works.
+
+```{r warning = F, message = F}
+# Iterate through a set of optimizers, report convergence results
+diff_optims <- allFit(model, maxfun = 1e5)
+```
+
+**Do not be fooled! These are not "OK" fits!** We need to check for convergence flags. Below, we're looking for the result `NULL` - meaning we have no convergence warnings in the fitted model with that optimizer.
+
+```{r}
+diff_optims_OK <- diff_optims[sapply(diff_optims, is, "merMod")]
+lapply(diff_optims_OK, function(x) x@optinfo$conv$lme4$messages)
+```
+
+We see that `bobyqa`, `Nelder_Mead`, and `mnkbw` converged. We'll now output (arbitrarily) the first model in the list that converged, with the `bobyqa` optimizer. Further, that algorithm is built in to lme4, so we do not require the optimx or nloptr packages (at least for now).
+
+```{r}
+convergence_results <- lapply(diff_optims_OK, function(x) x@optinfo$conv$lme4$messages)
 working_indices <- sapply(convergence_results, is.null)
-
-if(sum(working_indices)==0){
-  print("No algorithms from allFit converged.")
-  print("You may still be able to use the results, but proceed with extreme caution.")
+if(sum(working_indices) == 0){
+  print("No algorithms from allFit converged. You may still be able to use the results, but proceed with extreme caution.")
   first_fit <- NULL
 } else {
   first_fit <- diff_optims[working_indices][[1]]
@@ -33,99 +94,33 @@ if(sum(working_indices)==0){
 first_fit
 ```
 
-If that doesn't work, see the **Power User** section below.
+Hooray! However, if that doesn't work, see the **Power User** section below.
 
-Also, allFit() sometimes has trouble finding the input data for the models when it is nested in another function. See discussion
-[here](https://stackoverflow.com/questions/56893715/lme4-allfit-giving-confusing-results-when-wrapped-in-a-function)
-and / or contact Josh if you want some ideas for workarounds.
+If we had known ahead of time which optimizer to use, we get the same result:
 
-# Using allFit()
-
-## Introduction
-I frequently encounter onvergence problems when fitting mixed models. The goal of this vignette is to show how to use allFit() in the lme4 package to quickly test different optimizers in search of convergence.
-
-This document draws heavily on posts by 
-[Steven V. Miller](http://svmiller.com/blog/2018/06/mixed-effects-models-optimizer-checks/), 
-[unknown author](https://rstudio-pubs-static.s3.amazonaws.com/33653_57fc7b8e5d484c909b615d8633c01d51.html), and
-[unknown author](https://cran.r-project.org/web/packages/lme4/vignettes/lmerperf.html), many thanks!
-
-```{r setup, message = FALSE, warning=FALSE, cache=TRUE}
-library(tidyverse)
-library(lme4)
-library(optimx)
-library(parallel)
-library(minqa)
+```{r}
+lmer(y ~ arm + (1 + arm | clustid),
+     data = dat, control = lmerControl(optimizer = "bobyqa"))
 ```
 
-## Our hypothetical test case
 
-We assume a linear mixed model (LMM) approach to analyzing data from a two-arm cluster-randomized trial where the cluster-level variance is different in the two arms. We will simulate data using the code below. The variable **nsub** is the number of subjects per cluster and **nclust** is the number of clusters per arm, so your total sample size will be $nsub*nclust*2$. The **betas** give the mean responses in each arm (we'll fix the control arm at zero), **sig_b2** is a vector of cluster-level variance in each arm, and **sigma_residual** is the within-cluster variance, assumed to the the same across each arm. (To relax the sigma_residual assumption, you can use the nlme package with different weights by arm.)
+If you needed to use one of the algorithms from the *optimx* or *nloptr* families, the syntax is a little different in `lmerControl()`. We won't run these, they are just here as an example.
 
-```{r simulator_setup, message = FALSE, warning=FALSE, cache=TRUE}
-sim <- function(nsub = 2, nclust = 3, sigma_residual2 = 1,  sig_b2 = c(.3, 10), betas = c(0,1)){
-  narm <- 2
-  n <- nsub * nclust * narm
-  y <- rep_len(NA, n)
-  arm <- rep(0:(narm-1), each = nsub*nclust)
-  arm_factor <- as.factor(arm)
-  clustid <- rep(1:(nclust*narm), each = nsub)
-  clustRElist <- rnorm(narm*nclust, mean = 0, sd = rep(sqrt(sig_b2), each = nclust))
-  clustRE <- rep(clustRElist, each = nsub)
-  sig_b2 <- rep(sig_b2, each = nclust*nsub)
-  error <- rnorm(n, mean = 0, sd = sqrt(sigma_residual2))
-  beta <- rep(betas, each = nclust*nsub)
-  y <- beta + clustRE + error
-  output <- cbind.data.frame(arm, arm_factor, clustid, sig_b2, clustRE, error, beta, y)
-  return(output)
-}
-set.seed(2)
-dat <- sim(nsub = 100, nclust = 100, sigma_residual2 = .2,  sig_b2 = c(.3, 1), betas = c(0,1))
 ```
-
-## Convergence fails with default settings
-
-With our data in hand, let's fit a model that allows for different cluster-level variances in the two arms - we have a random intercept that is shared between both arms, then an additional amount of variance when arm = 1. When fitting this model, we get a convergence error. Not surprising, given the purpose of this vignette.
-
-```{r cache=TRUE}
-model <- lmer(y ~ arm + (1 + arm | clustid), data = dat)
-```
-
-## Finding an algorithm that works via allFit()
-
-Using allFit(), we can see if different optimizers might give us better results. It uses parallel processing (if available) to run multiple fits at once, which really speeds things up. **maxfun** sets the maximum number of iterations, though I have had R freeze up sometimes when I make that value too high. In this case, 1e6 works.
-
-```{r cache=TRUE}
-ncores <- detectCores()
-diff_optims <- allFit(model, maxfun = 1e5, parallel = 'multicore', ncpus = ncores)
-is.OK <- sapply(diff_optims, is, "merMod")
-diff_optims.OK <- diff_optims[is.OK]
-lapply(diff_optims.OK,function(x) x@optinfo$conv$lme4$messages)
-```
-
-"NULL" is what we want to see here - that means there were no error or warning messages when that particular algorithm was run. While most algorithms did not converge, it looks like Nelder_Mead and nlminbwrap did. Yay! Further, these two algorithms are built in to lme4, so we do not require the optimx or nloptr packages (at least for now).  Let's check those and see if we are correct.
-
-```{r cache=TRUE}
-model2 <- lmer(y ~ arm + (1 + arm | clustid), data = dat,
-               control = lmerControl(optimizer = "Nelder_Mead"))
-model3 <- lmer(y ~ arm + (1 + arm | clustid), data = dat,
-               control = lmerControl(optimizer = "nlminbwrap"))
-```
-
-No convergence warnings, yay!
-
-If the best algorithm does come from the *optimx* or *nloptr* families, the syntax is a little different:
-```{r cache=TRUE}
-model4 <- lmer(y ~ arm + (1 + arm | clustid), data = dat,
+lmer(y ~ arm + (1 + arm | clustid), data = dat,
                control = lmerControl(optimizer = "optimx",
-                                     optCtrl = list(method = "L-BFGS-B", maxit = 1e6)))
-model4 <- lmer(y ~ arm + (1 + arm | clustid), data = dat,
+                                     optCtrl = list(method = "L-BFGS-B", maxit = 1e5)))
+lmer(y ~ arm + (1 + arm | clustid), data = dat,
                control = lmerControl(optimizer = "nloptwrap",
-                                     optCtrl = list(algorithm = "NLOPT_LN_BOBYQA", maxit = 1e6)))
+                                     optCtrl = list(algorithm = "NLOPT_LN_BOBYQA", maxit = 1e5)))
 ```
-We already knew that these algorithms wouldn't converge in this case, but in another situation those other algorithms might be needed.
 
-Let's look at the model fits for the two algos that converged. Interestingly, the estimates of the 'arm' standard deviation and correlation with the intercept are quite different. However, when transforming those values into the original parameters, we find that they are two ways of getting to the same values.
-```{r cache=TRUE}
+### Which optimizer to choose?
+
+I've found that different optimizers may converge on estimates of the arm-specific variance and intercept correlation that are quite different. However, when transforming those values into the original parameters taking into account the estimated correlation, we find that they are two ways of getting to the same underlying parameter values.
+
+```{r include = F, echo =  F, eval = F}
+# This will later have to be updated with actual models with diff parameter values
 convergence_results <- lapply(diff_optims.OK,function(x) x@optinfo$conv$lme4$messages)
 working_indices <- sapply(convergence_results, is.null)
 diff_optims[working_indices]
@@ -151,53 +146,52 @@ sig_b2_n_m
 sig_b2_nlmin
 ```
 
-## Automatically selecting a method that converges
 
-It would be nice to automate this so that we could use whatever method converges and only be notified if *none* of them converge. Here's some code for that, with a bit of duplication from the last chunk:
 
-```{r cache=TRUE}
-convergence_results <- lapply(diff_optims.OK,function(x) x@optinfo$conv$lme4$messages)
-working_indices <- sapply(convergence_results, is.null)
-if(sum(working_indices)==0){
-  print("No algorithms from allFit converged.")
-  print("You may still be able to use the results, but proceed with extreme caution.")
-  first_fit <- NULL
-} else {
-  first_fit <- diff_optims[working_indices][[1]]
-}
-first_fit
+### allFit() called inside a function
+
+Note: allFit() sometimes has trouble finding the input data for the models when it is nested in another function. See discussion
+[here](https://stackoverflow.com/questions/56893715/lme4-allfit-giving-confusing-results-when-wrapped-in-a-function)
+and / or contact me if you want some ideas for workarounds.
+
+
+### Parallel processing option
+
+Since allFit() is processing each algorithm indepdendently, it's a natural candidate for parallel processing. Here's a simple example of how to make it run faster on my computer - may vary by operating system etc.
+
+```{r}
+library(parallel)
+ncores <- detectCores()
+diff_optims <- allFit(model, maxfun = 1e5, parallel = 'multicore', ncpus = ncores)
 ```
 
+$~$
 
-# Power User settings if allFit() doesn't work
+# Power Users: Obtaining convergence if allFit() doesn't work
+
 
 One downside of using allFit() is that you can't customize convergence/optimizer settings - you have to use the defaults. **(NOTE: Recent updates to lme4 allow for control commands in allFit(), so some of the following may be irrelevant. See lme4 news / release notes for more information.)** Yet changing the settings (increasing the maximum number of iterations, lowering the stopping tolerances, etc) can greatly improve convergence, though sometimes at the cost of slower fitting time. Here is some simple code you can use that might help your algorithm converge.
 
-## First Step: Change settings
+### First Step: Change settings
 
-Let's try the default optimizer with better settings and see if it works. Note that this is almost the same call in that first model we tried to fit, just with more specified options.
-```{r cache = TRUE}
-model5 <- lmer(y ~ arm + (1 + arm | clustid),
+Let's try the default optimizer with better settings and see if it works. Note that this is almost the same call in that first model we tried to fit, just with more iterations allowed. Some algorithms use `maxit`, some use `maxfun`; check the documentation.
+
+```{r}
+test_more_iterations <- lmer(y ~ arm + (1 + arm | clustid),
                data = dat,
-               control = lmerControl(optCtrl = list(maxit = 1e9,
-                                                    maxfun = 1e9,
-                                                    xtol_abs = 1e-11,
-                                                    ftol_abs = 1e-11,
-                                                    maxeval = 1e9)))
-summary(model5)
+               control = lmerControl(optCtrl = list(maxit = 1e9, maxfun = 1e9)))
 ```
 
-Yay! No errors or warnings. That was easy. But what if it hadn't converged?
+I've seen that work in the past, but not this time. Let's try something else.
 
-
-## Second Step: Amp up settings and loop through optimx optimizers
+### Second Step: Amp up settings and loop through optimx optimizers
 
 Below we loop through some of **optimx**'s optimizer choices AND the better optimizer settings. These choices have worked for me in mixed models; for more info see the **optimx** documentation.
 
-```{r cache = TRUE}
+```{r}
 optimx_options <- c("L-BFGS-B", "nlminb", "nlm", "bobyqa", "nmkb", "hjkb")
-
 for(i in 1:length(optimx_options)){
+  print(paste0("Testing optimx: ", optimx_options[i]))
   model_flex <- lmer(y ~ arm + (1 + arm | clustid),
                      data = dat,
                      control = lmerControl(optimizer = "optimx",
@@ -205,7 +199,7 @@ for(i in 1:length(optimx_options)){
                                                                    maxit = 1e9)))
   if(is.null(model_flex@optinfo$conv$lme4$messages)){
     print(paste0("One of the optimx options, ", optimx_options[i],", worked!"))
-    print(summary(model_flex))
+    print(model_flex)
     break
   }
 }
@@ -213,9 +207,9 @@ for(i in 1:length(optimx_options)){
 
 
 
-## Third Step: Amp up settings and loop through nloptwrap optimizers
+### Third Step: Amp up settings and loop through nloptwrap optimizers
 
-The **nloptwrap** set of optimizers is a little easier to use, because it uses the same option control formatting as the default. It also has a large (20+) set of algorithm options, and it's easy to cycle through them in a for loop to find one that might work, all with the customized settings that you want. Note that here the first several options do NOT work, before settling on BOBYQA.
+The **nloptwrap** set of optimizers is a little easier to use, because it uses the same option control formatting as the default. It also has a large (20+) set of algorithm options, and it's easy to cycle through them in a for loop to find one that might work, all with the customized settings that you want. The first two options do not work, then `NLOPT_LN_COBYLA` does. Yay...
 
 ```{r cache = TRUE}
 # More options are here: nloptr::nloptr.print.options() under "algorithm",
@@ -226,21 +220,24 @@ algoptions <- c("NLOPT_LN_PRAXIS", "NLOPT_GN_CRS2_LM",
 "NLOPT_LN_SBPLX", "NLOPT_LN_BOBYQA")
 
 for(i in 1:length(algoptions)){
+  print(paste0("Testing nloptwrap: ", algoptions[i]))
   model_flex <- lmer(y ~ arm + (1 + arm | clustid),
                      data = dat,
                      control = lmerControl(optimizer = "nloptwrap",
                                            optCtrl = list(algorithm = algoptions[i],
+                                                          maxfun = 1e9,
                                                           maxeval = 1e7,
                                                           xtol_abs = 1e-9,
                                                           ftol_abs = 1e-9)))
   if(is.null(model_flex@optinfo$conv$lme4$messages)){
     print(paste0("One of the nloptwrap options, ", algoptions[i],", worked!"))
-    print(summary(model_flex))
+    print(model_flex)
     break
   }
 }
 ```
 
+$~$
 
 # STILL no convergence?!?!
 
