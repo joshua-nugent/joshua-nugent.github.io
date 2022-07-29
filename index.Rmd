@@ -34,11 +34,11 @@ Peer-reviewed:
 
  + **Nugent, J**, Balzer, L. Evaluating shifts in mobility and COVID-19 case rates in U.S. counties: A demonstration of modified treatment policies for causal inference with continuous exposures. *(Accepted for publication at the American Journal of Epidemiology, in press. Pre-print [here](http://arxiv.org/abs/2110.12529))*
 
- + Kakande E, Christian C, Balzer LB, Owaraganise A, **Nugent J**, DiIeso W, Rast D, Kabami J, Johnson J, Camlin CS, Shade SB, Geng E, Kwarisiima D, Kamya MR, Havlir DV, Chamie G. Cluster RCT of a mid-level manager intervention to promote IPT uptake in Uganda. *(Forthcoming in The Lancet HIV)*
+ + Kakande E, Christian C, Balzer LB, Owaraganise A, **Nugent J**, DiIeso W, Rast D, Kabami J, Johnson J, Camlin CS, Shade SB, Geng E, Kwarisiima D, Kamya MR, Havlir DV, Chamie G. Cluster RCT of a mid-level manager intervention to promote IPT uptake in Uganda. The Lancet HIV 2022. https://doi.org/10.1016/S2352-3018(22)00166-7
 
- + **Nugent, J**, Kleinman, K. Type I error control for cluster randomized trials under varying small sample structures. BMC Med Res Methodol 21, 65 (2021). https://doi.org/10.1186/s12874-021-01236-7
+ + **Nugent, J**, Kleinman, K. Type I error control for cluster randomized trials under varying small sample structures. BMC Med Res Methodol 2021. https://doi.org/10.1186/s12874-021-01236-7
 
- + Koss CA, Havlir DV, Ayieko J, Kwarisiima D, Kabami J, Chamie G, Atukunda M, Mwinike Y, Mwangwa F, Owaraganise A, Peng J, OliloW, Snyman K, Awuonda B, Clark TD, Black D, **Nugent J**, Brown LB, Marquez C, Okochi H, Zhang K, Camlin CS, Jain V, Gandhi M, Cohen CR, Bukusi EA, Charlebois ED, Petersen ML, Kamya MR, Balzer LB. HIV incidence after pre-exposure prophylaxis initiation among women and men at elevated HIV risk: A population-based study in rural Kenya and Uganda. PLOS Med. 2021 Feb 9;18(2):e1003492. https://doi.org/10.1371/journal.pmed.1003492
+ + Koss CA, Havlir DV, Ayieko J, Kwarisiima D, Kabami J, Chamie G, Atukunda M, Mwinike Y, Mwangwa F, Owaraganise A, Peng J, OliloW, Snyman K, Awuonda B, Clark TD, Black D, **Nugent J**, Brown LB, Marquez C, Okochi H, Zhang K, Camlin CS, Jain V, Gandhi M, Cohen CR, Bukusi EA, Charlebois ED, Petersen ML, Kamya MR, Balzer LB. HIV incidence after pre-exposure prophylaxis initiation among women and men at elevated HIV risk: A population-based study in rural Kenya and Uganda. PLOS Med 2021. https://doi.org/10.1371/journal.pmed.1003492
 
 In progress: Methods
 
