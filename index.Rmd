@@ -5,7 +5,7 @@ output: html_document
 <img style="float: right;width: 340px;padding:20px;" src="biopic.jpg">
 
 
-Biostatistician researching causal inference, machine learning, and cluster-randomized trials (CRTs). Before earning my doctorate (advised by [Laura Balzer](https://www.balzerlab.com/)), I was a high school math teacher for 8 years, among other things. I work frequently with the [SEARCH Collaboration](https://www.searchendaids.com/), evaluating impacts of various interventions to reduce infectious disease burden in Kenya and Uganda. Here is [my full CV](https://joshua-nugent.github.io/cv/Nugent_CV.pdf).
+Biostatistician at the [Kaiser Permanente Division of Research](https://divisionofresearch.kaiserpermanente.org/) working in causal inference, machine learning, and cluster-randomized trials (CRTs). Before earning my doctorate (advised by [Laura Balzer](https://www.balzerlab.com/)), I was a high school math teacher for 8 years, among other things. I have also worked frequently with the [SEARCH Collaboration](https://www.searchendaids.com/), evaluating impacts of various interventions to reduce infectious disease burden in Kenya and Uganda. Here is [my full CV](https://joshua-nugent.github.io/cv/Nugent_CV.pdf).
 
 
 ## Research interests & expertise:
