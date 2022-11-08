@@ -5,7 +5,9 @@ output: html_document
 <img style="float: right;width: 340px;padding:20px;" src="biopic.jpg">
 
 
-Biostatistician at the [Kaiser Permanente Division of Research](https://divisionofresearch.kaiserpermanente.org/) working in causal inference, machine learning, and cluster-randomized trials (CRTs). Before earning my doctorate (advised by [Laura Balzer](https://www.balzerlab.com/)), I was a high school math teacher for 8 years, among other things. I have also worked frequently with the [SEARCH Collaboration](https://www.searchendaids.com/), evaluating impacts of various interventions to reduce infectious disease burden in Kenya and Uganda. Here is [my full CV](https://joshua-nugent.github.io/cv/Nugent_CV.pdf).
+Biostatistician at the [Kaiser Permanente Division of Research](https://divisionofresearch.kaiserpermanente.org/) focusing on causal inference, machine learning, and clustered data. Before earning my doctorate (advised by [Laura Balzer](https://www.balzerlab.com/)), I was a high school math teacher for 8 years, among other things. I have also worked frequently with the [SEARCH Collaboration](https://www.searchendaids.com/), evaluating impacts of various interventions to reduce infectious disease burden in Kenya and Uganda.
+
+[curriculum vitae](https://joshua-nugent.github.io/cv/Nugent_CV.pdf) / [Google Scholar](https://scholar.google.com/citations?user=WGw7LVEAAAAJ&hl=en)
 
 
 ## Research interests & expertise:
@@ -16,9 +18,7 @@ Biostatistician at the [Kaiser Permanente Division of Research](https://division
  
  + Integrating (ensemble) machine learning and statistical inference via targeted learning
  
- + Design and analysis of CRTs, particularly with small samples
- 
- + Statistical analyses with complex missingness and dependence
+ + Design and analysis of randomized trials, particularly with small samples and complex dependence structures
  
  + Interpretation and communication of statistical results
  
@@ -28,62 +28,35 @@ Biostatistician at the [Kaiser Permanente Division of Research](https://division
 
 
  
-## Publications
+## Highlighted publications
+
+Please see my [Google Scholar profile](https://scholar.google.com/citations?user=WGw7LVEAAAAJ&hl=en) for the most up-to-date publication list.
 
 Peer-reviewed:
 
  + **Nugent, J**, Balzer, L. Evaluating shifts in mobility and COVID-19 case rates in U.S. counties: A demonstration of modified treatment policies for causal inference with continuous exposures. *(Accepted for publication at the American Journal of Epidemiology, in press. Pre-print [here](http://arxiv.org/abs/2110.12529))*
 
- + Kakande E, Christian C, Balzer LB, Owaraganise A, **Nugent J**, DiIeso W, Rast D, Kabami J, Johnson J, Camlin CS, Shade SB, Geng E, Kwarisiima D, Kamya MR, Havlir DV, Chamie G. Cluster RCT of a mid-level manager intervention to promote IPT uptake in Uganda. The Lancet HIV 2022. https://doi.org/10.1016/S2352-3018(22)00166-7
+ + Kakande E, Christian C, Balzer L, Owaraganise A, **Nugent J**, DiIeso W, Rast D, Kabami J, Johnson J, Camlin CS, Shade SB, Geng E, Kwarisiima D, Kamya MR, Havlir DV, Chamie G. Cluster RCT of a mid-level manager intervention to promote IPT uptake in Uganda. The Lancet HIV 2022. https://doi.org/10.1016/S2352-3018(22)00166-7
 
  + **Nugent, J**, Kleinman, K. Type I error control for cluster randomized trials under varying small sample structures. BMC Med Res Methodol 2021. https://doi.org/10.1186/s12874-021-01236-7
 
- + Koss CA, Havlir DV, Ayieko J, Kwarisiima D, Kabami J, Chamie G, Atukunda M, Mwinike Y, Mwangwa F, Owaraganise A, Peng J, OliloW, Snyman K, Awuonda B, Clark TD, Black D, **Nugent J**, Brown LB, Marquez C, Okochi H, Zhang K, Camlin CS, Jain V, Gandhi M, Cohen CR, Bukusi EA, Charlebois ED, Petersen ML, Kamya MR, Balzer LB. HIV incidence after pre-exposure prophylaxis initiation among women and men at elevated HIV risk: A population-based study in rural Kenya and Uganda. PLOS Med 2021. https://doi.org/10.1371/journal.pmed.1003492
+ + Koss CA, Havlir DV, Ayieko J, Kwarisiima D, Kabami J, Chamie G, Atukunda M, Mwinike Y, Mwangwa F, Owaraganise A, Peng J, OliloW, Snyman K, Awuonda B, Clark TD, Black D, **Nugent J**, Brown LB, Marquez C, Okochi H, Zhang K, Camlin CS, Jain V, Gandhi M, Cohen CR, Bukusi EA, Charlebois ED, Petersen ML, Kamya MR, Balzer L. HIV incidence after pre-exposure prophylaxis initiation among women and men at elevated HIV risk: A population-based study in rural Kenya and Uganda. PLOS Med 2021. https://doi.org/10.1371/journal.pmed.1003492
 
-In progress: Methods
+In progress:
 
- + **Nugent, J**, Balzer, L. Blurring cluster randomized trials and observational studies:
-Evaluating the SEARCH intervention on incident TB in rural Uganda. *(Dissertation chapter)*
+ + **Nugent J**, Marquez C, Charlebois E, Abbott R, Balzer L. Blurring cluster randomized trials and observational studies using two-stage TMLE to address sub-sampling, missingness, and minimal independent units. *(Under review, pre-print [here](http://arxiv.org/abs/2208.09508))*
 
  + **Nugent, J**, Balzer, L. Semiparametric methods for randomized trials with clustering in a single arm. *(Dissertation chapter)*
 
-In progress: Applications
-
  + Impact of a community-wide HIV test and treat intervention on population level TB transmission in rural Uganda. *(Author list and manuscript being finalized)*
 
- + Social networks predict PrEP uptake in SEARCH study in rural Kenya and Uganda. *(Author list and manuscript being finalized)*
-
-Pre-registered statistical analyis plans
-
- + **Nugent J**, Balzer L. Statistical Analysis Plan for Tuberculosis Outcomes in SEARCH TB Study. (2022). *Link forthcoming.*
-
- + Balzer L, **Nugent J**, Havlir D, Chamie G. Statistical Analysis Plan for Health Outcomes in Phase 1 of the SEARCH-IPT Study. (2021). https://arxiv.org/abs/2111.10467
-
- 
-## Consulting clients / projects
-
- + SEARCH Collaboration: Evaluation of a community-wide intervention on population level TB transmission in rural Uganda.
-
- + EnCompass, LLC: External review of a study to determine prevalence of and risk factors for forced labor among migrant workers in southeast Asia.
-
- + Franklin County Council of Governments Health Equity Working Group: Statistical analysis of impacts of COVID-19 pandemic in western Massachusetts.
- 
- + University of Massachusetts Amherst College of Natural Sciences: Development of survey instruments, analysis / interpretation / communication of results.
- 
 
 ## Informal projects, explainers, experiments, visualizations, etc...
 
- + Inspired by the recent arrival of a nephew, an analysis of state-level patterns in newborn names and future name popularity prediction. [Summary of some findings](http://joshua-nugent.github.io/newborn_names) and [Shiny app in development](https://joshuanugent.shinyapps.io/babynames/) to explore the data.
+ + Inspired by the recent arrival of a nephew, an analysis of state-level patterns in newborn names and future name popularity prediction. [Summary of some 2020 findings](http://joshua-nugent.github.io/newborn_names) and [Shiny app in development](https://joshuanugent.shinyapps.io/babynames/) to explore the data.
 
  + [Vignette](https://joshua-nugent.github.io/allFit/) on adjusting settings, trying different optimizers, and/or using the allFit() function to help achieve convergence in lmer/glmer mixed models. At least one person (not me) has used this to save their dissertation research from failure!
 
- + [Vignette](https://joshua-nugent.github.io/maximin/) walking through [Breukelen and Candel's 2015 paper](https://doi.org/10.1177/0962280211421344) on maximin approaches to planning a cluster randomized trial and calculating sample size in the face of uncertainty.
-
- + Extremely beginner-friendly [vignette](https://joshua-nugent.github.io/splines/) on how splines work in regression.
-
- + [Forecasting flu incidence in Germany](https://joshua-nugent.github.io/eb/eb.pdf) - Seminar presentation with colleagues implementing from scratch a forecasting algorithm developed by [Brooks et al.](https://doi.org/10.1371/journal.pcbi.1004382)
- 
- + Unpublished paper: [Investigating bias in penalized quasi-likelihood (PQL) estimation for generalized linear mixed models with dichotomous outcomes](https://joshua-nugent.github.io/pql/main.pdf).
 
 <br>
 
