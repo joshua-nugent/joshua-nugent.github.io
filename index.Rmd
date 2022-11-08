@@ -5,64 +5,37 @@ output: html_document
 <img style="float: right;width: 340px;padding:20px;" src="biopic.jpg">
 
 
-Biostatistician at the [Kaiser Permanente Division of Research](https://divisionofresearch.kaiserpermanente.org/) focusing on causal inference, machine learning, and clustered data. Before earning my doctorate (advised by [Laura Balzer](https://www.balzerlab.com/)), I was a high school math teacher for 8 years, among other things. I have also worked frequently with the [SEARCH Collaboration](https://www.searchendaids.com/), evaluating impacts of various interventions to reduce infectious disease burden in Kenya and Uganda.
+Biostatistician at the [Kaiser Permanente Division of Research](https://divisionofresearch.kaiserpermanente.org/researchers/nugent-joshua) focusing on causal inference, machine learning, and clustered data. Before earning my doctorate (advised by [Laura Balzer](https://www.balzerlab.com/)), I was a high school math teacher for 8 years, among other things. I have also worked frequently with the [SEARCH Collaboration](https://www.searchendaids.com/), evaluating impacts of various interventions to reduce infectious disease burden in Kenya and Uganda.
 
-[curriculum vitae](https://joshua-nugent.github.io/cv/Nugent_CV.pdf) / [Google Scholar](https://scholar.google.com/citations?user=WGw7LVEAAAAJ&hl=en)
-
-
-## Research interests & expertise:
+### Research interests & expertise:
 
  + Causal inference with applications to public health, medicine, and public policy
- 
  + Semiparametric statistics with discrete or continuous exposures
- 
  + Integrating (ensemble) machine learning and statistical inference via targeted learning
- 
  + Design and analysis of randomized trials, particularly with small samples and complex dependence structures
- 
  + Interpretation and communication of statistical results
- 
  + Teaching statistical concepts
- 
  + Anti-racism, equity, inclusion, social justice, conflict resolution
 
 
  
-## Highlighted publications
+### Publications
 
 Please see my [Google Scholar profile](https://scholar.google.com/citations?user=WGw7LVEAAAAJ&hl=en) for the most up-to-date publication list.
 
-Peer-reviewed:
 
- + **Nugent, J**, Balzer, L. Evaluating shifts in mobility and COVID-19 case rates in U.S. counties: A demonstration of modified treatment policies for causal inference with continuous exposures. *(Accepted for publication at the American Journal of Epidemiology, in press. Pre-print [here](http://arxiv.org/abs/2110.12529))*
-
- + Kakande E, Christian C, Balzer L, Owaraganise A, **Nugent J**, DiIeso W, Rast D, Kabami J, Johnson J, Camlin CS, Shade SB, Geng E, Kwarisiima D, Kamya MR, Havlir DV, Chamie G. Cluster RCT of a mid-level manager intervention to promote IPT uptake in Uganda. The Lancet HIV 2022. https://doi.org/10.1016/S2352-3018(22)00166-7
-
- + **Nugent, J**, Kleinman, K. Type I error control for cluster randomized trials under varying small sample structures. BMC Med Res Methodol 2021. https://doi.org/10.1186/s12874-021-01236-7
-
- + Koss CA, Havlir DV, Ayieko J, Kwarisiima D, Kabami J, Chamie G, Atukunda M, Mwinike Y, Mwangwa F, Owaraganise A, Peng J, OliloW, Snyman K, Awuonda B, Clark TD, Black D, **Nugent J**, Brown LB, Marquez C, Okochi H, Zhang K, Camlin CS, Jain V, Gandhi M, Cohen CR, Bukusi EA, Charlebois ED, Petersen ML, Kamya MR, Balzer L. HIV incidence after pre-exposure prophylaxis initiation among women and men at elevated HIV risk: A population-based study in rural Kenya and Uganda. PLOS Med 2021. https://doi.org/10.1371/journal.pmed.1003492
-
-In progress:
-
- + **Nugent J**, Marquez C, Charlebois E, Abbott R, Balzer L. Blurring cluster randomized trials and observational studies using two-stage TMLE to address sub-sampling, missingness, and minimal independent units. *(Under review, pre-print [here](http://arxiv.org/abs/2208.09508))*
-
- + **Nugent, J**, Balzer, L. Semiparametric methods for randomized trials with clustering in a single arm. *(Dissertation chapter)*
-
- + Impact of a community-wide HIV test and treat intervention on population level TB transmission in rural Uganda. *(Author list and manuscript being finalized)*
-
-
-## Informal projects, explainers, experiments, visualizations, etc...
+### Informal projects, explainers, experiments, visualizations, etc...
 
  + Inspired by the recent arrival of a nephew, an analysis of state-level patterns in newborn names and future name popularity prediction. [Summary of some 2020 findings](http://joshua-nugent.github.io/newborn_names) and [Shiny app in development](https://joshuanugent.shinyapps.io/babynames/) to explore the data.
 
  + [Vignette](https://joshua-nugent.github.io/allFit/) on adjusting settings, trying different optimizers, and/or using the allFit() function to help achieve convergence in lmer/glmer mixed models. At least one person (not me) has used this to save their dissertation research from failure!
 
 
-<br>
 
 <center>
-[![Tw](t_blue.png){width=3%}](https://twitter.com/joshuanugent?ref_src=twsrc%5Etfw)
+[![Tw](t_blue.png){width=3%}](https://twitter.com/joshuanugent)
 </center>
-
+  
 <br>
+  
 
