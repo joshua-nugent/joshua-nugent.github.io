@@ -1,6 +1,6 @@
 ---
 title: "A Very Gentle Introduction to Splines"
-author: "Josh Nugent, Fall 2019"
+author: "Josh Nugent, Fall 2019, updated Spring 2023"
 output:
   html_document:
     number_sections: TRUE
@@ -9,7 +9,7 @@ bibliography: SPLINES.bib
 nocite: '@*'
 ---
 
-Heavily indebted to various internet sources; see References at the end for the most prominent.
+Heavily indebted to various internet sources; see References at the end for the most prominent. Additional thanks to [Dr. Mara Tableman](https://www.pdx.edu/profile/exists?id=bymt) for corrections via email.
 
 ### Load useful packages etc...
 
@@ -20,7 +20,7 @@ library(pander)
 ```
 
 ```{r warning = F, message = F, echo = F}
-knitr::opts_chunk$set(fig.height=3, fig.width=6, fig.align='center', warning = F, message = F, cache = T)
+knitr::opts_chunk$set(fig.height=4, fig.width=7, fig.align='center', warning = F, message = F, cache = T)
 set.seed(1)
 ```
 
@@ -138,15 +138,15 @@ $$
 
 One way to keep the model from overfitting is to put a constraint on $\sum b_k^2$, say, $\sum b_k^2 < C$, to keep the coefficients from making the slopes leap up and down at each knot. Our penalty term $\lambda$ is a function of $C$.
 
-Under this constraint, it can be shown (derivation omitted) that the OLS estimator for the coefficients is:
+Under this constraint, it can be shown (derivation omitted) that the penalized least squares estimate for the coefficient vector (notably, the same as the ridge regression solution) is:
 
 $$
 \begin{equation}
-\hat{\boldsymbol{\beta}}=(\mathbf{X}^{T} \mathbf{X}+\lambda^{2} \mathbf{D})^{-1} \mathbf{X}^{T} \mathbf{y}
+\hat{\boldsymbol{\beta}}=(\mathbf{X}^{T} \mathbf{X}+\lambda \mathbf{D})^{-1} \mathbf{X}^{T} \mathbf{y}
 \end{equation}
 $$
 
-Where $\mathbf{D}$ is a matrix of all zeros, except on the diagonal, where the first two terms are zero (for $\beta_0$ and $\beta_1$) and the rest of the diagonal terms are 1 (for all of the constrained $b_k$s). Using that result to investigate different penalty levels for our data set:
+where $\mathbf{D}$ is a matrix of all zeros, except on the diagonal, where the first two terms are zero (for $\beta_0$ and $\beta_1$) and the rest of the diagonal terms are 1 (for all of the constrained $b_k$s). Using that result to investigate different penalty levels for our data set:
 
 ```{r}
 x <- seq(from = 0, to = 6, by = .025)
@@ -154,23 +154,21 @@ knot_vector = seq(from = 0.1, to = 5.9, by = .2)
 D <- diag(c(0,0,rep(1, times = length(knot_vector))))
 X <- cbind(1, generate_design_matrix(degree = 1, knot_vector = knot_vector, x = x))
 # derivation of coefficients for penalized linear splines
-betas_.5 <- solve(t(X) %*% X + (.5^2) * D) %*% t(X) %*% y
-betas_1 <- solve(t(X) %*% X + (1^2) * D) %*% t(X) %*% y
-betas_3 <- solve(t(X) %*% X + (3^2) * D) %*% t(X) %*% y
+betas_.5 <- solve(t(X) %*% X + (.5) * D) %*% t(X) %*% y
+betas_9 <- solve(t(X) %*% X + (9) * D) %*% t(X) %*% y
 yhat.5 <- X %*% betas_.5
-yhat1 <- X %*% betas_1
-yhat3 <- X %*% betas_3
+yhat9 <- X %*% betas_9
 ggplot() +
   geom_point(aes(x = x, y = y), color = "black", alpha = .3) +
   geom_line(aes(x = x, y = yhat.5), color = "black", alpha = 1) +
-  geom_line(aes(x = x, y = yhat3), color = "green", alpha = 1) +
+  geom_line(aes(x = x, y = yhat9), color = "purple", alpha = 1) +
   geom_line(aes(x = x, y = yhatbad), color = "red", alpha = 1) +
-  labs(title = "lambda = 0 (red, overfit), .5 (black, good), 3 (green, underfit)")
+  labs(title = "lambda = 0 (red, overfit), .5 (black, good), 9 (purple, underfit)")
 ```
 
 ### Choosing $\lambda$ via cross-validation
 
-As in many applications, we can use cross-validation to select the best balance of bias and variance to minimize the mean squared error. Here we'll do 5-fold CV to find a value of $lambda$ somewhere between 0 and 1. I'm also going to reduce the number of knots to make the matrix inversions easier (more on numerical stability later).
+As in many applications, we can use cross-validation to select the best balance of bias and variance to minimize the mean squared error. Here we'll do 5-fold CV to find a value of $\lambda$ somewhere between 0 and 1. I'm also going to reduce the number of knots to make the matrix inversions easier (more on numerical stability later).
 
 ```{r}
 library(caret)
