@@ -168,7 +168,7 @@ ggplot() +
 
 ### Choosing $\lambda$ via cross-validation
 
-As in many applications, we can use cross-validation to select the best balance of bias and variance to minimize the mean squared error. Here we'll do 5-fold CV to find a value of $\lambda$ somewhere between 0 and 1. I'm also going to reduce the number of knots to make the matrix inversions easier (more on numerical stability later).
+As in many applications, we can use cross-validation to select the best balance of bias and variance to minimize the mean squared error. Here we'll do 5-fold CV to find a value of $\lambda$. I'm also going to reduce the number of knots to make the matrix inversions easier (more on numerical stability later).
 
 ```{r}
 library(caret)
@@ -178,14 +178,14 @@ D <- diag(c(0,0,rep(1, times = length(knot_vector))))
 
 k <- 5
 fold_indices <- createFolds(x, k = k)
-lambda_grid <- seq(from = 0, to = 1, by = .01)
+lambda_grid <- seq(from = 0, to = .25, by = .01)
 results <- matrix(data = NA, nrow = k, ncol = length(lambda_grid))
 
 for(j in 1:length(lambda_grid)){
     for(i in 1:k){
       X_test <- cbind(1, generate_design_matrix(degree = 1, knot_vector = knot_vector, x = x[fold_indices[[i]]]))
       X_train <- cbind(1, generate_design_matrix(degree = 1, knot_vector = knot_vector, x = x[-fold_indices[[i]]]))
-      betas_train <- solve(t(X_train) %*% X_train + (lambda_grid[j]^2) * D) %*% t(X_train) %*% y[-fold_indices[[i]]]
+      betas_train <- solve(t(X_train) %*% X_train + (lambda_grid[j]) * D) %*% t(X_train) %*% y[-fold_indices[[i]]]
       y_test <- X_test %*% betas_train
       mse <- mean((y[fold_indices[[i]]] - y_test)^2)
       results[i,j] <- mse
@@ -198,17 +198,17 @@ ggplot() +
   labs(title = "MSE", y = "Average MSE across the 5 folds", x = "lambda value")
 ```
 
-The lowest MSE occurrs when $\lambda$ is about $.25$ Let's fit the whole data set with that value and examine the results:
+The lowest MSE occurrs when $\lambda$ is about $.05$. Let's fit the whole data set with that value and examine the results:
 
 ```{r}
 D <- diag(c(0,0,rep(1, times = length(knot_vector))))
 X <- cbind(1, generate_design_matrix(degree = 1, knot_vector = knot_vector, x = x))
-betas_CV <- solve(t(X) %*% X + (.25^2) * D) %*% t(X) %*% y
+betas_CV <- solve(t(X) %*% X + (.05) * D) %*% t(X) %*% y
 yhatCV <- X %*% betas_CV
 ggplot() +
   geom_point(aes(x = x, y = y), color = "black", alpha = .3) +
   geom_line(aes(x = x, y = yhatCV), color = "black", alpha = 1) +
-  labs(title = "lambda = .25... looks like a pretty good fit for these knot choices.")
+  labs(title = "lambda = .05... looks like a pretty good fit for these knot choices.")
 ```
 
 
