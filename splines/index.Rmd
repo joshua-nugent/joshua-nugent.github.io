@@ -154,16 +154,16 @@ knot_vector = seq(from = 0.1, to = 5.9, by = .2)
 D <- diag(c(0,0,rep(1, times = length(knot_vector))))
 X <- cbind(1, generate_design_matrix(degree = 1, knot_vector = knot_vector, x = x))
 # derivation of coefficients for penalized linear splines
-betas_.5 <- solve(t(X) %*% X + (.5) * D) %*% t(X) %*% y
+betas_.1 <- solve(t(X) %*% X + (.1) * D) %*% t(X) %*% y
 betas_9 <- solve(t(X) %*% X + (9) * D) %*% t(X) %*% y
-yhat.5 <- X %*% betas_.5
+yhat.1 <- X %*% betas_.1
 yhat9 <- X %*% betas_9
 ggplot() +
   geom_point(aes(x = x, y = y), color = "black", alpha = .3) +
-  geom_line(aes(x = x, y = yhat.5), color = "black", alpha = 1) +
+  geom_line(aes(x = x, y = yhat.1), color = "black", alpha = 1) +
   geom_line(aes(x = x, y = yhat9), color = "purple", alpha = 1) +
   geom_line(aes(x = x, y = yhatbad), color = "red", alpha = 1) +
-  labs(title = "lambda = 0 (red, overfit), .5 (black, good), 9 (purple, underfit)")
+  labs(title = "lambda = 0 (red, overfit), .1 (black, better), 9 (purple, underfit)")
 ```
 
 ### Choosing $\lambda$ via cross-validation
