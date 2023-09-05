@@ -1,0 +1,192 @@
+---
+title: "Baseline variables and change scores in RCTs with continuous outcomes"
+author: "Josh Nugent, `r Sys.Date()`"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r message = F, warning = F}
+library(tidyverse)
+source("0_functions.R")
+```
+
+# Why include baseline outcome values?
+
+Assume an RCT with two equally-balanced arms. We have a baseline outcome measure at randomization (time = 0) and are interested in the mean differences of the outcome measure at follow-up (time = 1).
+
+The data-simulating function can be viewed in the `0_functions.R` script. There is a parameter in the function (`beta_RTM`) that controls the proportion of regression to the mean that occurs between baseline and follow-up. For example, a person with a very high baseline value is probably more likely to have a lower value on follow-up, and vice versa. If `beta_RTM = 0`, there is no regression to the mean; `beta_RTM > 0` indicates some amount of regression to the mean.
+
+Here's an example of data with with regression to the mean and a very strong treatment effect:
+
+```{r echo=F}
+ggplot(data = pivot_longer(sim_data(n = 200, beta_RTM = .5, beta_main = 1.5, baseline_imbalance = F), cols = c("baseline", "follow_up")) %>% 
+         mutate(arm = ifelse(trt==1, "trt", "ctrl"))) + theme_minimal()+
+  geom_point(aes(x = name, y = value, color = arm), fill = "gray90", alpha = .3) +
+  geom_line(aes(x = name, y = value, group = id, color = arm), alpha = .3) +
+  theme(axis.title.x = element_blank())
+```
+
+## Estimating the treatment effect
+
+The causal treatment effect in this simulation is (arbitrarily) set to `0.15` in this simulation; further, to keep it simple, there is no effect modification by baseline value. We'll use two simple linear models - one where we just model the follow-up value (equivalent to a t-test) and one where we include the baseline value as a covariate. For each, we'll generate 2000 data sets and extract the treatment indicator coefficient and confidence interval to evaluate bias, 95% coverage, and statistical power. We are ignoring Type 1 error for now. Here are the point estimates and CIs for the first 40 runs:
+
+```{r cache = T, echo = F}
+include_baseline <- data.frame(
+  t(replicate(n = 2000,
+              expr = run_it(beta_RTM = .25,
+                            include_baseline = T,
+                            baseline_imbalance = F))))
+no_baseline <- data.frame(
+  t(replicate(n = 2000,
+              expr = run_it(beta_RTM = .25,
+                            include_baseline = F,
+                            baseline_imbalance = F))))
+```
+
+
+```{r echo = F}
+n <- 40
+ggplot() +
+  geom_errorbar(data = include_baseline[1:n,],
+                aes(x = 1:n, ymin = lo, ymax = hi), alpha = .75) +
+  geom_errorbar(data = no_baseline[1:n,],
+                aes(x = 1:n, ymin = lo, ymax = hi), alpha = .75) +
+  geom_point(data = include_baseline[1:n,],
+             aes(x = 1:n, y = est)) +
+  geom_point(data = no_baseline[1:n,],
+             aes(x = 1:n, y = est)) +
+  geom_hline(data = rbind(no_baseline, include_baseline), aes(yintercept = .15),
+             color = "red", linetype = 2) +
+  theme_minimal() +
+  theme(axis.title.x = element_blank(), axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()) +
+  facet_grid(.~include_baseline, labeller = "label_both")
+```
+
+The point estimates are much closer to the true value when including the baseline value, and the CIs are smaller as well. Note that both approaches have good 95% interval coverage and are unbiased:
+
+```{r echo = F}
+cat(paste0("Bias without baseline outcome value: ", round(mean(no_baseline$bias), digits = 3)))
+cat(paste0("Bias including baseline outcome value: ", round(mean(include_baseline$bias), digits = 3)))
+cat(paste0("95% interval coverage without baseline outcome value: ", round(mean(no_baseline$cover)*100, digits = 1),"%"))
+cat(paste0("95% interval coverage including baseline outcome value: ", round(mean(include_baseline$cover)*100, digits = 1),"%"))
+```
+
+But the smaller CIs and smaller range of point estimates give the model that includes the baseline value a LOT more power in detecting the true effect:
+
+```{r echo = F}
+cat(paste0("Power without baseline outcome value: ", round(mean(no_baseline$pwr)*100, digits = 1),"%"))
+cat(paste0("Power including baseline outcome value: ", round(mean(include_baseline$pw)*100, digits = 1),"%"))
+```
+
+
+# Outcome: Change score or just follow-up score?
+
++ If there is no baseline imbalance between the two trial arms, simple comparisons (t-test) of change scores by arm is fine.
++ If there is baseline imbalance but no regression to the mean, simple comparisons (t-test) of change scores by arm is fine.
++ If both are present (and arguably both will be present to some extent in most cases), then the change score as outcome will be biased unless the baseline score is also included as a covariate.
+
+
+Why is this? The intuitive explanation is that when you have regression to the mean and baseline imbalance, one of the arms will have a larger change score (which is unrelated to treatment) that will bias the treatment effect. Imagine the treatment arm has higher HbA1c values at baseline. With regression to the mean, their change scores are likely to be larger in absolute value (say, larger decreases) than the control arm. A simple comparison won't "know" that the baseline scores are driving this, and the resulting analysis will overestimate the magnitude of the treatment effect.
+
+We can also demonstrate the problem with using only change scores via simulations. In the first set here, we model just the change score by treatment arm - equivalent to a t-test on the arm-specific mean change scores. The groups have some imbalance at baseline and exhibit regression to the mean.
+
+```{r}
+change_score_only <- data.frame(
+  t(replicate(n = 2000, expr = run_it(beta_RTM = .25,
+  change_score = T,
+  baseline_imbalance = T,
+  include_baseline = F))))
+```
+
+```{r echo = F}
+cat(paste0("Bias using change score only: ", round(mean(change_score_only$bias), digits = 3)))
+cat(paste0("95% interval coverage using change score only: ", round(mean(change_score_only$cover)*100, digits = 1),"%"))
+```
+
+In this case, we have biased estimates and verrrrry poor 95% CI coverage.
+
+If we simply add baseline values to our model, the bias and coverage go back to where we want:
+
+```{r}
+change_score_with_baseline_value <- data.frame(
+  t(replicate(n = 2000, expr = run_it(beta_RTM = .25,
+  change_score = T,
+  baseline_imbalance = T,
+  include_baseline = T))))
+```
+
+```{r echo = F}
+cat(paste0("Bias using change score with baseline value: ", round(mean(change_score_with_baseline_value$bias), digits = 3)))
+cat(paste0("95% interval coverage using change score with baseline value: ", round(mean(change_score_with_baseline_value$cover)*100, digits = 1),"%"))
+```
+
+If we have regression to the mean but no imbalance, OR imbalance but no regression to the mean, we're also OK.
+
+```{r}
+no_baseline_imbalance <- data.frame(
+  t(replicate(n = 2000, expr = run_it(beta_RTM = .25,
+  change_score = T,
+  baseline_imbalance = F,
+  include_baseline = F))))
+```
+
+```{r echo = F}
+cat(paste0("Bias using change score only, no imbalance: ", round(mean(no_baseline_imbalance$bias), digits = 3)))
+cat(paste0("95% interval coverage using change score only, no imbalance: ", round(mean(no_baseline_imbalance$cover)*100, digits = 1),"%"))
+
+```
+
+```{r}
+no_RTM <- data.frame(
+  t(replicate(n = 2000, expr = run_it(beta_RTM = 0,
+  change_score = T,
+  baseline_imbalance = T,
+  include_baseline = F))))
+```
+
+```{r echo = F}
+cat(paste0("Bias using change score only, no regression to the mean: ", round(mean(no_RTM$bias), digits = 3)))
+cat(paste0("95% interval coverage using change score only, no regression to the mean: ", round(mean(no_RTM$cover)*100, digits = 1),"%"))
+```
+
+Googling around will give you more detailed descriptions of some of these issues, as well as a more mathematical explanation based on linear models and correlated error terms.
+
+# Take-home messages
+
+It's usually a good idea to include baseline outcome values. Even in a well-randomized RCT, there will be almost always be some mild imbalance between arms, and including baseline values as a covariate will improve precision. Including baseline values will also remove any bias if you decide to use change scores as an outcome.
+
+
+```{r}
+sessionInfo()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
