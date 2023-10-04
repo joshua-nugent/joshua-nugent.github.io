@@ -1,0 +1,15 @@
+---
+title: "JJB & JRN get married?"
+output: html_document
+---
+
+<img style="float: right;width: 600px;padding:20px;" src="pic.jpg">
+
+## Date
+
+May 26, 2024!
+
+## Place
+
+[Foreign Cinema](http://foreigncinema.com/)!
+
