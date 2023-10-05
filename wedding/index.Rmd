@@ -1,15 +1,35 @@
 ---
-title: "JJB & JRN get married?"
+title: "JJB & JRN get married!"
 output: html_document
 ---
 
-<img style="float: right;width: 600px;padding:20px;" src="pic.jpg">
+<img style="float: right; width: 500px; padding:20px;" src="pic.jpg">
 
 ## Date
 
-May 26, 2024!
+Sunday, May 26, 2024!
 
 ## Place
 
-[Foreign Cinema](http://foreigncinema.com/)!
+[Foreign Cinema](http://foreigncinema.com/), 6pm!
 
+## Other events
+
+Optional but recommended!
+
+ + Saturday daytime hang at ________!
+ + Saturday evening pre-party at ________!
+ + Monday morning after-party at ________!
+ 
+ 
+## Weather
+
+Weather forecast [here](https://www.wunderground.com/calendar/us/ca/san-bruno/KSFO/date/2024-5)! Dang, looks good!
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
