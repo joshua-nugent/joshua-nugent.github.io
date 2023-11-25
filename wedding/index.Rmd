@@ -3,30 +3,71 @@ title: "JJB & JRN get married!"
 output: html_document
 ---
 
-<img style="float: right; width: 500px; padding:20px;" src="pic.jpg">
+```{r echo = F}
+library(knitr)
+```
+:::: {style="display: flex;"}
 
-## Date
+::: {.column width="40%"}
+
+# REAL WEDDING WEB SITE:
+
+[https://www.zola.com/wedding/jbjn](https://www.zola.com/wedding/jbjn)
+
+### Date
 
 Sunday, May 26, 2024!
 
-## Place
+### Place
 
 [Foreign Cinema](http://foreigncinema.com/), 6pm!
 
-## Other events
-
-Optional but recommended!
-
- + Saturday daytime hang at ________!
- + Saturday evening pre-party at ________!
- + Monday morning after-party at ________!
- 
- 
-## Weather
+### Weather
 
 Weather forecast [here](https://www.wunderground.com/calendar/us/ca/san-bruno/KSFO/date/2024-5)! Dang, looks good!
+
+:::
+
+::: {.column width="30%"}
+
+```{r echo = F}
+knitr::opts_chunk$set(dpi=36)
+knitr::opts_chunk$set(dev="jpeg", fig.retina = 1)
+
+include_graphics("pix/3.jpg")
+include_graphics("pix/1.jpg")
+include_graphics("pix/2.jpg")
+include_graphics("pix/4.jpg")
+include_graphics("pix/5.jpg")
+include_graphics("pix/6.jpg")
+include_graphics("pix/7.jpg")
+```
+
+:::
+
+::: {.column width="30%"}
+
+```{r echo = F}
+knitr::opts_chunk$set(dpi=36)
+knitr::opts_chunk$set(dev="jpeg", fig.retina = 1)
+
+include_graphics("pix/8.jpg")
+include_graphics("pix/9.jpg")
+include_graphics("pix/10.jpg")
+include_graphics("pix/11.jpg")
+include_graphics("pix/12.jpg")
+include_graphics("pix/13.jpg")
+```
+
+:::
+
+
+::::
+
  
- 
+
+
+
  
  
  
