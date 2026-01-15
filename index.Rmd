@@ -26,7 +26,8 @@ Please see my [Google Scholar profile](https://scholar.google.com/citations?user
 
 ### Informal projects, explainers, experiments, visualizations, etc...
 
- + Inspired by the recent arrival of a nephew, an analysis of state-level patterns in newborn names and future name popularity prediction. [Summary of some 2020 findings](http://joshua-nugent.github.io/newborn_names) and [Shiny app in development](https://joshuanugent.shinyapps.io/babynames/) to explore the data.
+ + Inspired by the recent arrival of a nephew, an analysis of state-level patterns in newborn names and future name popularity prediction. [Here is my initial attempt using Shiny](https://joshuanugent.shinyapps.io/babynames/), along with some 
+ [2020 findings](http://joshua-nugent.github.io/newborn_names); here is the [much improved, vibe-coded version](http://nobadnames.com).
 
  + [Vignette](https://joshua-nugent.github.io/allFit/) on adjusting settings, trying different optimizers, and/or using the allFit() function to help achieve convergence in lmer/glmer mixed models. At least one person (not me) has used this to save their dissertation research from failure!
 
