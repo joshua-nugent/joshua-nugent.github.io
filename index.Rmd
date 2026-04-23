@@ -5,29 +5,16 @@ output: html_document
 <img style="float: right;width: 340px;padding:20px;" src="biopic.jpg">
 
 
-Biostatistician at the [Kaiser Permanente Division of Research](https://divisionofresearch.kaiserpermanente.org/researchers/nugent-joshua) focusing on causal inference, machine learning, and clustered data. Before earning my doctorate (advised by [Laura Balzer](https://www.balzerlab.com/)), I was a high school math teacher for 8 years, among other things. I have also worked frequently with the [SEARCH Collaboration](https://www.searchendaids.com/), evaluating impacts of various interventions to reduce infectious disease burden in Kenya and Uganda.
-
-### Research interests & expertise:
-
- + Causal inference with applications to public health, medicine, and public policy
- + Semiparametric statistics with discrete or continuous exposures
- + Integrating (ensemble) machine learning and statistical inference via targeted learning
- + Design and analysis of randomized trials, particularly with small samples and complex dependence structures
- + Interpretation and communication of statistical results
- + Teaching statistical concepts
- + Anti-racism, equity, inclusion, social justice, conflict resolution
+Biostatistician at the [Kaiser Permanente Division of Research](https://divisionofresearch.kaiserpermanente.org/researchers/nugent-joshua) focusing on causal inference. Before earning my doctorate, I was a high school math teacher for 8 years, among other things. Please see my [Google Scholar profile](https://scholar.google.com/citations?user=WGw7LVEAAAAJ&hl=en) for the most up-to-date publication list.
 
 
+### Informal projects & experiments
+
+ + [nobadbabynames.com](http://nobadnames.com): Inspired by the recent arrival of a nephew, an analysis of state-level patterns in newborn names and future name popularity prediction.
  
-### Publications
-
-Please see my [Google Scholar profile](https://scholar.google.com/citations?user=WGw7LVEAAAAJ&hl=en) for the most up-to-date publication list.
-
-
-### Informal projects, explainers, experiments, visualizations, etc...
-
- + Inspired by the recent arrival of a nephew, an analysis of state-level patterns in newborn names and future name popularity prediction. [Here is my initial attempt using Shiny](https://joshuanugent.shinyapps.io/babynames/), along with some 
- [2020 findings](http://joshua-nugent.github.io/newborn_names); here is the [much improved, vibe-coded version](http://nobadnames.com).
+  + [dumdum.fyi](http://dumdum.fyi): Real estate searching & price prediction. Also packaged as a [Chrome extension](https://chromewebstore.google.com/detail/cojdogelemdkdpmienkjokcnolpkbemf?utm_source=item-share-cb).
+  
+  + [swoopscore.win](https://swoopscore.win): Why keep score in card games with paper when you could use your phone?
 
  + [Vignette](https://joshua-nugent.github.io/allFit/) on adjusting settings, trying different optimizers, and/or using the allFit() function to help achieve convergence in lmer/glmer mixed models. At least one person (not me) has used this to save their dissertation research from failure!
 
