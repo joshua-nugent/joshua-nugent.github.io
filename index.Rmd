@@ -11,8 +11,6 @@ Biostatistician at the [Kaiser Permanente Division of Research](https://division
 ### Informal projects & experiments
 
  + [nobadbabynames.com](http://nobadnames.com): Inspired by the recent arrival of a nephew, an analysis of state-level patterns in newborn names and future name popularity prediction.
- 
-  + [dumdum.fyi](http://dumdum.fyi): Real estate searching & price prediction. Also packaged as a [Chrome extension](https://chromewebstore.google.com/detail/cojdogelemdkdpmienkjokcnolpkbemf?utm_source=item-share-cb).
   
   + [swoopscore.win](https://swoopscore.win): Why keep score in card games with paper when you could use your phone?
 
